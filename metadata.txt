@@ -1,0 +1,13 @@
+[general]
+name= Visor Panorámico 360°
+internal_name = Visor360
+qgisMinimumVersion=3.12
+qgisMaximumVersion=3.99
+description= Plugin que visualiza imagenes equirrectangulares.
+about= Este plugin permite la visualización de imágenes locales equirrectangulares, se utiliza la librería Marzipano.
+version= 0.1
+author= Roberto Saucedo.	
+email= roberto.hernandez@grupotum.com
+icon=images/icon.png
+experimental=True
+deprecated=False
