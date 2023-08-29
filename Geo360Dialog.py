@@ -1,22 +1,18 @@
-import math
 import os
-from qgis.core import (
-    QgsPointXY,
-    # QgsProject,
-    QgsFeatureRequest,
-    QgsVectorLayer,
-    QgsWkbTypes,
+import sys
+
+script_directory = os.path.dirname(os.path.abspath(__file__))
+visor360_directory = os.path.join(script_directory, 'Visor360')
+sys.path.append(visor360_directory)
+
+import math
+from qgis.core import (QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes,
 )
 from qgis.gui import QgsRubberBand
 
-from qgis.PyQt.QtCore import (
-    QObject,
-    QUrl,
-    Qt,
-    pyqtSignal,
-    QJsonDocument,
-    # QtCore
+from qgis.PyQt.QtCore import ( Qt, pyqtSignal, QUrl, QJsonDocument, QByteArray, QObject,
 )
+
 from qgis.PyQt.QtWidgets import QDialog, QWidget, QDockWidget
 from qgis.PyQt.QtGui import QWindow
 import Visor360.config as config
@@ -26,7 +22,8 @@ from Visor360.utils.qgsutils import qgsutils
 from qgis.PyQt.QtWebKitWidgets import QWebView, QWebPage
 from qgis.PyQt.QtWebKit import QWebSettings
 
-# from qgis.PyQt.QtNetwork import QNetworkRequest, QNetworkAccessManager
+from qgis.PyQt.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply
+
 
 try:
     from pydevd import *
@@ -54,7 +51,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     """ Geo360 Dialog Class """
 
-    def __init__(self, iface, parent=None, x=None, y=None, selected_features=None, layer=None):
+    def __init__(self, iface, parent=None, selected_features=None, layer=None, x=None, y=None):
 
         QDockWidget.__init__(self)
 
@@ -177,15 +174,15 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def GetImage(self):
         """ Obtener la imagen seleccionada """
         try:
-            data = QtCore.QByteArray()
+            data = QByteArray()
             data.append(b'latitud=' + str(x) + '&amp;')
             data.append(b'longitud=' + str(y))
 
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
-            req.setHeader(QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader,
+            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
             'application/x-www-form-urlencoded')
 
-            self.nam = QtNetwork.QNetworkAccessManager()
+            self.nam = QNetworkAccessManager()
             self.nam.finished.connect(self.handleResponse)
             self.nam.post(req, data)
             self.apth = 'https://10.16.106.74/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre
@@ -200,14 +197,14 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         er = reply.error()
 
-        if er == QtNetwork.QNetworkReply.NetworkError.NoError:
+        if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
 
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
-            req.setHeader(QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader,
+            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
             'application/json')
 
-            self.nam = QtNetwork.QNetworkAccessManager()
+            self.nam = QNetworkAccessManager()
             self.nam.finished.connect(self.handleRecorrido)
             self.nam.post(req, bytes_string)
             
@@ -219,7 +216,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def handelRecorrdio(self, reply):
         er = reply.error()
 
-        if er == QtNetwork.QNetworkReply.NetworkError.NoError:
+        if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             puntos = jsonO['puntos'].toArray()
@@ -231,6 +228,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
                  imagenNombre = imagenNombre + ".jpg"
 
             self.path = 'https://10.16.106.74/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre,
+
+            self.current_image = self.path
 
             qgsutils.showUserAndLogMessage(
                 u"Información: ", str(self.path), onlyLog=True

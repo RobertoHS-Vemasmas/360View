@@ -23,7 +23,8 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 class Geo360:
-    def __init__(self, iface):
+    def __init__(self, iface, parent):
+        super().__init__(parent)
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
         threadcount = QThread.idealThreadCount()
@@ -38,7 +39,7 @@ class Geo360:
     def initGui(self):
         log.initLogging()
         self.action = QAction(
-            QIcon(":/Visor360/images/icon.png"),
+            QIcon(":/Visor360/images/icon"),
             u"360 View",
             self.iface.mainWindow(),
         )
@@ -116,7 +117,7 @@ class Geo360:
                     return
                 
             self.orbitalViewer = Geo360Dialog(
-                self.iface, parent=self, x=x, y=self.y, selected_features=self.selected_features, layer=layer
+                self.iface, parent=self, x=event.x(), y=event.y(), selected_features=self.selected_features, layer=layer
             )
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
         else:
@@ -163,4 +164,6 @@ class SelectTool(QgsMapToolIdentify):
         self.canvas.setCursor(self.cursor)
 
     def canvasReleaseEvent(self, event):
-        self.parent.ShowViewer(x=event.x(), y=event.y())
+        x = event.x()
+        y = event.y()
+        self.parent.ShowViewer(x=x, y=y)
