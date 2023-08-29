@@ -1,5 +1,5 @@
 from qgis.gui import QgsMapToolIdentify
-from qgis.PyQt.QtCore import Qt, QSettings, QThread
+from qgis.PyQt.QtCore import Qt, QSettings, QThread, QObject
 from qgis.PyQt.QtGui import QIcon, QCursor, QPixmap
 from qgis.PyQt.QtWidgets import QAction
 
@@ -22,9 +22,9 @@ class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-class Geo360:
-    def __init__(self, iface, parent):
-        super().__init__(parent)
+class Geo360(QObject):
+    def __init__(self, iface):
+        super().__init__()
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
         threadcount = QThread.idealThreadCount()
