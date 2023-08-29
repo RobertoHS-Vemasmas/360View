@@ -3,10 +3,10 @@ from qgis.PyQt.QtCore import Qt, QSettings, QThread, QObject
 from qgis.PyQt.QtGui import QIcon, QCursor, QPixmap
 from qgis.PyQt.QtWidgets import QAction
 
-from Visor360.Geo360Dialog import Geo360Dialog
+from .Geo360Dialog import Geo360Dialog
 import Visor360.config as config
-from Visor360.utils.log import log
-from Visor360.utils.qgsutils import qgsutils
+from .utils.log import log
+from .utils.qgsutils import qgsutils
 from qgis.core import QgsApplication
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer

@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from Visor360.ui import icons_rc
 
 
 class Ui_orbitalDialog(object):
