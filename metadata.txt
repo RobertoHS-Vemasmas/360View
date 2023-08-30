@@ -1,5 +1,5 @@
 [general]
-name= Visor Panorámico 360°
+name= Visor 360°
 internal_name = Visor360
 qgisMinimumVersion=3.12
 qgisMaximumVersion=3.99
@@ -8,6 +8,6 @@ about= Este plugin permite la visualización de imágenes locales equirrectangul
 version= 0.1
 author= Roberto Saucedo.	
 email= roberto.hernandez@grupotum.com
-icon=images/icon.png
+icon=ui/images/icon.png
 experimental=True
 deprecated=False

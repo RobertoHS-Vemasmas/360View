@@ -1,5 +1,5 @@
 from qgis.gui import QgsMapToolIdentify
-from qgis.PyQt.QtCore import Qt, QSettings, QThread, QObject
+from qgis.PyQt.QtCore import Qt, QSettings, QThread
 from qgis.PyQt.QtGui import QIcon, QCursor, QPixmap
 from qgis.PyQt.QtWidgets import QAction
 
@@ -13,18 +13,17 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 import time
 
-# try:
-#     from pydevd import *
-# except ImportError:
-#     None
+try:
+    from pydevd import *
+except ImportError:
+    None
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-class Geo360(QObject):
+class Geo360:
     def __init__(self, iface):
-        super().__init__()
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
         threadcount = QThread.idealThreadCount()
@@ -34,13 +33,12 @@ class Geo360(QObject):
         self.orbitalViewer = None
         self.server = None
         self.make_server()
-        self.selected_features = []
 
     def initGui(self):
         log.initLogging()
         self.action = QAction(
             QIcon(":/Visor360/images/icon"),
-            u"360 View",
+            u"360",
             self.iface.mainWindow(),
         )
         self.action.triggered.connect(self.run)
@@ -86,44 +84,28 @@ class Geo360(QObject):
         self.found = False
         lys = self.canvas.layers()
         for layer in lys:
-            if layer.name() == config.layer_name:
-                self.found = True
-                self.mapTool = SelectTool(self.iface, parent=self, layer=layer)
-                self.iface.mapCanvas().setMapTool(self.mapTool)
+            layer.name() == config.layer_name
+            self.found = True
+            self.mapTool = SelectTool(self.iface, parent=self, layer=layer)
+            self.iface.mapCanvas().setMapTool(self.mapTool)
 
-        if not self.found:
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", u"Necesitas subir recorrido."
-            )
-            return
+        # if not self.found:
+        #     qgsutils.showUserAndLogMessage(
+        #         u"Información: ", u"Necesitas subir recorrido."
+        #     )
+            # return
 
     def ShowViewer(self, x=None, y=None):
         self.x = x
         self.y = y
 
         if self.orbitalViewer is None:
-            lys = self.canvas.layers()
-            for layer in lys:
-                if layer.name() == config.layer_name:
-                    self.found = True
-                    self.layer = layer
-                    self.mapTool = SelectTool(self.iface, parent=self, layer=layer)
-                    self.iface.mapCanvas().setMapTool(self.mapTool)
-                    break
-                if not self.found:
-                    qgsutils.showUserAndLogMessage(
-                        u"Información: ", u"Necesitas subir recorrido"
-                    )
-                    return
-                
             self.orbitalViewer = Geo360Dialog(
-                self.iface, parent=self, x=event.x(), y=event.y(), selected_features=self.selected_features, layer=layer
+                self.iface, parent=self, x=x, y=self.y
             )
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
         else:
-            newIds = [feature[config.column_id] for feature in  self.selected_features]
-            # newId = self.selected_features.attribute(config.column_id)
-            self.orbitalViewer.ReloadView(newIds)
+            self.orbitalViewer.ReloadView(self.x, self.y)
 
 class SelectTool(QgsMapToolIdentify):
     def __init__(self, iface, parent=None, layer=None):
@@ -164,6 +146,11 @@ class SelectTool(QgsMapToolIdentify):
         self.canvas.setCursor(self.cursor)
 
     def canvasReleaseEvent(self, event):
-        x = event.x()
-        y = event.y()
-        self.parent.ShowViewer(x=x, y=y)
+        x = event.pos().x()
+        y = event.pos().y()
+
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+        self.parent.ShowViewer(
+            x=point[0], 
+            y=point[1],
+        )

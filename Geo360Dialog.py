@@ -1,29 +1,19 @@
-import os
-import sys
-
-script_directory = os.path.dirname(os.path.abspath(__file__))
-visor360_directory = os.path.join(script_directory, 'Visor360')
-sys.path.append(visor360_directory)
-
 import math
-from qgis.core import (QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes,
-)
+import os
+from qgis.core import (QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes)
 from qgis.gui import QgsRubberBand
-
-from qgis.PyQt.QtCore import ( Qt, pyqtSignal, QUrl, QJsonDocument, QByteArray, QObject,
-)
+from qgis.PyQt.QtCore import ( Qt, pyqtSignal, QUrl, QJsonDocument, QObject, QByteArray)
 
 from qgis.PyQt.QtWidgets import QDialog, QWidget, QDockWidget
 from qgis.PyQt.QtGui import QWindow
 import Visor360.config as config
-from Visor360.geom.transformgeom import transformGeometry
-from Visor360.gui.ui_orbitalDialog import Ui_orbitalDialog
-from Visor360.utils.qgsutils import qgsutils
+from .geom.transformgeom import transformGeometry
+from  .ui.output_ui  import Ui_orbitalDialog
+from .utils.qgsutils import qgsutils
 from qgis.PyQt.QtWebKitWidgets import QWebView, QWebPage
 from qgis.PyQt.QtWebKit import QWebSettings
 
-from qgis.PyQt.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkReply
-
+from qgis.PyQt.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkRequest, QNetworkAccessManager, QNetworkReply, QSslSocket
 
 try:
     from pydevd import *
@@ -51,7 +41,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     """ Geo360 Dialog Class """
 
-    def __init__(self, iface, parent=None, selected_features=None, layer=None, x=None, y=None):
+    def __init__(self, iface, parent=None, x=None, y=None):
 
         QDockWidget.__init__(self)
 
@@ -68,7 +58,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
         self.parent = parent
-        self.path = None
 
         # Orientación de la imagen
         self.yaw = math.pi  # No hace nada
@@ -81,18 +70,9 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.actualPointSx = None
         self.actualPointOrientation = None
 
-        self.selected_features = selected_features
-        self.layer = layer
-
         # Obtener la ruta de la imagen.
+        self.GetImage()
         self.current_image = self.GetImage()
-        # self.GetImage()
-        # self.current_image = self.path
-        # if self.current_image is None:
-        #     qgsutils.showUserAndLogMessage(
-        #         u"Información: u", "No se pudo obtener la ruta de la imagen."
-        #     )
-        #     return
 
         # Comprobar si existe la imagen
         if not os.path.exists(self.current_image):
@@ -132,8 +112,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         pano_view_settings = self.cef_widget.settings()
         pano_view_settings.setAttribute(QWebSettings.JavascriptEnabled, True)
         pano_view_settings.setAttribute(QWebSettings.WebGLEnabled, True)
-        pano_view_settings.setAttribute(
-            QWebSettings.Accelerated2dCanvasEnabled, True)
+        pano_view_settings.setAttribute(QWebSettings.Accelerated2dCanvasEnabled, True)
         pano_view_settings.setAttribute(QWebSettings.JavascriptEnabled, True)
 
         self.page = _ViewerPage()
@@ -173,25 +152,31 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
-        try:
-            data = QByteArray()
-            data.append(b'latitud=' + str(x) + '&amp;')
-            data.append(b'longitud=' + str(y))
 
-            req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
-            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
-            'application/x-www-form-urlencoded')
+        json = {'latitud' : self.x, 'Longitud' : self.y}
+        document = QJsonDocument(json)
+        print(document.toJson())
+ 
+        # data = QByteArray()
+        # data.append(b'latitud=' + str(self.x) + '&amp;')
+        # data.append(b'longitud=' + str(self.y))
+        # print(data)
 
-            self.nam = QNetworkAccessManager()
-            self.nam.finished.connect(self.handleResponse)
-            self.nam.post(req, data)
-            self.apth = 'https://10.16.106.74/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre
+        req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
+        req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
+        'application/json')
+        print(req)
 
-        except Exception:
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", u"No fue posible conectarse al servidor."
-            )
-            return
+        conf = req.sslConfiguration()
+        conf.setPeerVerifyMode(QSslSocket.VerifyNone)
+        req.setSslConfiguration(conf)
+
+        self.nam = QNetworkAccessManager()
+        self.nam.finished.connect(self.handleResponse)
+        self.nam.post(req, document.toJson())
+
+        print(self.nam)
+
 
     def handleResponse(self, reply):
 
@@ -199,6 +184,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
+            print(bytes_string)
 
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
             req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
@@ -257,6 +243,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.current_image = self.GetImage()
 
         # Comprobar si existe la imagen
+        print("Value of self.current_image:", self.current_image)
         if not os.path.exists(self.current_image):
             qgsutils.showUserAndLogMessage(
                 u"Información: ", u"No existe imagen asociada."
@@ -436,7 +423,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.actualPointDx = qgsutils.convertProjection(
             originalPoint.x(),
             originalPoint.y(),
-            "EPSG:4326",
+            "EPSG:3857",
             self.canvas.mapSettings().destinationCrs().authid(),
         )
 

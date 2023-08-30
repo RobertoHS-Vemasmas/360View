@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/Visor360/images">
-        <file alias="icon">ui/images/icon.png</file>
-        <file alias="Next_Arrow">ui/images/Next_Arrow.png</file>
-        <file alias="Previous_Arrow">ui/images/Previous_Arrow.png</file>
-        <file alias="full_screen">ui/images/full_screen.png</file>
+        <file alias="icon">/images/icon.png</file>
+        <file alias="Next_Arrow">/images/Next_Arrow.png</file>
+        <file alias="Previous_Arrow">/images/Previous_Arrow.png</file>
+        <file alias="full_screen">/images/full_screen.png</file>
     </qresource>
 </RCC>

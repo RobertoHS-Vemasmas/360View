@@ -34,4 +34,4 @@ except ImportError:
 def classFactory(iface):
     from .Geo360 import Geo360
 
-    return Geo360(iface=iface)
+    return Geo360(iface)
