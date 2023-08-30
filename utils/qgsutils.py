@@ -8,7 +8,9 @@ from qgis.core import (
     QgsCoordinateTransform,
     QgsRectangle,
 )
-from . import log
+
+from .log import log
+
 class qgsutils(object):
     @staticmethod
     def convertProjection(x, y, from_crs, to_crs):

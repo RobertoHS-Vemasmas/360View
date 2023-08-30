@@ -53,7 +53,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.parent = parent
 
         # Orientación de la imagen
-        self.yaw = math.pi  # No hace nada
+        self.yaw = math.pi
         self.bearing = None
 
         self.x = x
@@ -146,7 +146,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def GetImage(self):
         """ Obtener la imagen seleccionada """
 
-        json = {'latitud' : self.x, 'Longitud' : self.y}
+        json = {'Latitud' : self.x, 'Longitud' : self.y}
         document = QJsonDocument(json)
         print(document.toJson())
  
@@ -169,7 +169,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.nam.post(req, document.toJson())
 
         print(self.nam)
-
 
     def handleResponse(self, reply):
 
