@@ -4,7 +4,7 @@ from qgis.PyQt.QtGui import QIcon, QCursor, QPixmap
 from qgis.PyQt.QtWidgets import QAction
 
 from .Geo360Dialog import Geo360Dialog
-import Visor360.config as config
+from . import config
 from .utils.log import log
 from .utils.qgsutils import qgsutils
 from qgis.core import QgsApplication
@@ -12,11 +12,6 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 import time
-
-try:
-    from pydevd import *
-except ImportError:
-    None
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -156,9 +151,8 @@ class SelectTool(QgsMapToolIdentify):
         # )
 
         point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-        self.actualPoint = qgsutils.convertProjection(
+        self.point = qgsutils.convertProjection(
             point.x(),
             point.y(),
-            "EPSG:3857",
             self.canvas.mapSettings().destinationCrs().authid(),
         )

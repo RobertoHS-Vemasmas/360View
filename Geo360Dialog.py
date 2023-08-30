@@ -2,11 +2,11 @@ import math
 import os
 from qgis.core import (QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes)
 from qgis.gui import QgsRubberBand
-from qgis.PyQt.QtCore import ( Qt, pyqtSignal, QUrl, QJsonDocument, QObject, QByteArray)
+from qgis.PyQt.QtCore import (Qt, pyqtSignal, QUrl, QJsonDocument, QObject, QByteArray)
 
 from qgis.PyQt.QtWidgets import QDialog, QWidget, QDockWidget
 from qgis.PyQt.QtGui import QWindow
-import Visor360.config as config
+from . import config
 from .geom.transformgeom import transformGeometry
 from  .ui.output_ui  import Ui_orbitalDialog
 from .utils.qgsutils import qgsutils
@@ -416,6 +416,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def setPosition(self):
         """ Establecer la posición RubberBand """
+
         # Punto de transformación
         originalPoint = self.selected_features.geometry().asPoint()
         self.actualPointDx = qgsutils.convertProjection(
