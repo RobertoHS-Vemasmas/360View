@@ -1,8 +1,8 @@
 import math
 import os
-from qgis.core import (QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes)
+from qgis.core import QgsPointXY, QgsProject, QgsFeatureRequest,QgsVectorLayer, QgsWkbTypes
 from qgis.gui import QgsRubberBand
-from qgis.PyQt.QtCore import (Qt, pyqtSignal, QUrl, QJsonDocument, QObject, QByteArray)
+from qgis.PyQt.QtCore import Qt, pyqtSignal, QUrl, QJsonDocument, QObject, QByteArray
 
 from qgis.PyQt.QtWidgets import QDialog, QWidget, QDockWidget
 from qgis.PyQt.QtGui import QWindow
@@ -12,13 +12,7 @@ from  .ui.output_ui  import Ui_orbitalDialog
 from .utils.qgsutils import qgsutils
 from qgis.PyQt.QtWebKitWidgets import QWebView, QWebPage
 from qgis.PyQt.QtWebKit import QWebSettings
-
 from qgis.PyQt.QtNetwork import QNetworkRequest, QNetworkAccessManager, QNetworkRequest, QNetworkAccessManager, QNetworkReply, QSslSocket
-
-try:
-    from pydevd import *
-except ImportError:
-    None
 
 try:
     from PIL import Image
@@ -26,7 +20,6 @@ except ImportError:
     None
 
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-
 class _ViewerPage(QWebPage):
     obj = []  # Sincrónico
     newData = pyqtSignal(list)  # Asincrónico
