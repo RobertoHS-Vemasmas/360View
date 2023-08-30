@@ -33,7 +33,7 @@ class Geo360:
         log.initLogging()
         self.action = QAction(
             QIcon(":/Visor360/images/icon"),
-            u"360",
+            u"Visor 360°",
             self.iface.mainWindow(),
         )
         self.action.triggered.connect(self.run)

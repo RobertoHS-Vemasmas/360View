@@ -1,9 +1,3 @@
-"""
-/***************************************************************************
- Equirectangular 360 Plugin
- ***************************************************************************/
-"""
-
 from qgis.core import Qgis as QGis
 from qgis.gui import QgsRubberBand
 from qgis.utils import iface
@@ -14,14 +8,7 @@ from qgis.core import (
     QgsCoordinateTransform,
     QgsRectangle,
 )
-from Visor360.utils.log import log
-
-try:
-    from pydevd import *
-except ImportError:
-    None
-
-
+from . import log
 class qgsutils(object):
     @staticmethod
     def convertProjection(x, y, from_crs, to_crs):
