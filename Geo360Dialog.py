@@ -323,8 +323,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def FullScreen(self, value):
         """ Botón de acción de pantalla completa """
         qgsutils.showUserAndLogMessage(
-            u"Información: ",
-            u"Pantalla completa.", onlyLog=True
+            u"Información: ", u"Pantalla completa.", onlyLog=True
         )
         if value:
             self.showFullScreen()
@@ -417,7 +416,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def setPosition(self):
         """ Establecer la posición RubberBand """
-
         # Punto de transformación
         originalPoint = self.selected_features.geometry().asPoint()
         self.actualPointDx = qgsutils.convertProjection(

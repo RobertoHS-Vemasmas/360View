@@ -149,16 +149,16 @@ class SelectTool(QgsMapToolIdentify):
         x = event.pos().x()
         y = event.pos().y()
 
-        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-        # self.parent = qgsutils.convertProjection(
-        #     point.x(), 
-        #     point.y(),
-        #     "EPSG:3857",
-        #     self.canvas.mapSettings().destinationCrs().authid(),
+        # point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+        # self.parent.ShowViewer(
+        #     x=point[0],
+        #     y=point[1],
         # )
 
-
-        self.parent.ShowViewer(
-            x=point[0], 
-            y=point[1],
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+        self.actualPoint = qgsutils.convertProjection(
+            point.x(),
+            point.y(),
+            "EPSG:3857",
+            self.canvas.mapSettings().destinationCrs().authid(),
         )
