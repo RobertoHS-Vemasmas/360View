@@ -76,7 +76,7 @@
                                 </property>
                                 <property name="icon">
                                     <iconset>
-                                        <normaloff>:/images/Next_Arrow.png</normaloff>
+                                        <normaloff>:/images/up.png</normaloff>
                                     </iconset>
                                 </property>
                             </widget>
@@ -88,7 +88,7 @@
                                 </property>
                                 <property name="icon">
                                     <iconset>
-                                        <normaloff>:/images/Previous_Arrow.png</normaloff>
+                                        <normaloff>:/images/down.png</normaloff>
                                     </iconset>
                                 </property>
                             </widget>
@@ -99,7 +99,7 @@
         </widget>
     </widget>
     <resources>
-        <include location="resources.qrc"/>
+        <include location="icons.qrc"/>
     </resources>
     <connections>
         <connection>
