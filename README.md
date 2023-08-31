@@ -5,7 +5,3 @@ Este complemento permite la visualización de imágenes equirectangulares, se pu
 Se requiere la bilioteca Pillow, instalar el paquete Pillow python:
 
 `python3 -m pip install pillow`
-
-o usando:
-
-<!-- `python3 -m pip install -r requirements.txt` -->
