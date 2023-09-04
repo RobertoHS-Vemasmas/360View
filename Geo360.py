@@ -141,69 +141,39 @@ class SelectTool(QgsMapToolIdentify):
     def activate(self):
         self.canvas.setCursor(self.cursor)
 
+    # def canvasReleaseEvent(self, event):
+    #     x = event.pos().x()
+    #     y = event.pos().y()
+
+    #     point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+    #     self.parent.ShowViewer(
+    #         x=point[0],
+    #         y=point[1],
+    #     )
+
     def canvasReleaseEvent(self, event):
         x = event.pos().x()
         y = event.pos().y()
 
-        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+        canvas_crs = self.canvas.mapSettings().destinationCrs()
+        transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem("EPSG:3857"), QgsProject.instance())
+        point = transform.transform(QgsPointXY(x, y))
         self.parent.ShowViewer(
-            x=point[0],
-            y=point[1],
+            x=point.x(),
+            y=point.y(),
         )
 
     # def canvasReleaseEvent(self, event):
     #     x = event.pos().x()
     #     y = event.pos().y()
 
-    #     canvas_crs = self.canvas.mapSettings().destinationCrs()
-    #     transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem("EPSG:3857"), QgsProject.instance())
+    #     point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
 
-    #     point = transform.transform(QgsPointXY(x, y))
-
-    #     self.parent.ShowViewer(
-    #         x=point.x(),
-    #         y=point.y(),
-    #     )
-
-    # def canvasReleaseEvent(self, event):
-    #     x = event.pos().x()
-    #     y = event.pos().y()
-
-    #     canvas_crs = self.canvas.mapSettings().destinationCrs()
-    #     epsg_code = 32614
-
-    #     transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem(f"EPSG:{epsg_code}"), QgsProject.instance())
-    #     point = transform.transform(QgsPointXY(x, y))
+    #     crs_dest = QgsCoordinateReferenceSystem('EPSG:32614')
+    #     transform = QgsCoordinateTransform(self.canvas.mapSettings().destinationCrs(), crs_dest, QgsProject.instance())
+    #     transformed_point = transform.transform(point)
 
     #     self.parent.ShowViewer(
-    #         x=point.x(),
-    #         y=point.y(),
+    #         x=transformed_point.x(),
+    #         y=transformed_point.y(),
     #     )
-
-    # def canvasReleaseEvent(self, event):
-    #     x = event.pos().x()
-    #     y = event.pos().y()
-
-    #     canvas_crs = self.canvas.mapSettings().destinationCrs()
-    #     epsg_code = 32614
-
-    #     utm_proj = pyproj.Proj(proj='utm', zone=14, ellps='WGS84')  # UTM 14N Querétaro
-
-    #     # Convertir las coordenadas del lienzo a UTM
-    #     map_to_pixel = self.canvas.getCoordinateTransform().mapToPixel
-    #     canvas_x, canvas_y = map_to_pixel(QgsPointXY(x, y))
-
-    #     # Convertir las coordenadas UTM a latitud y longitud en formato decimal simple
-    #     utm_easting, utm_northing = utm_proj(canvas_x, canvas_y)
-
-
-    #     self.parent.ShowViewer(
-    #         x=utm_easting,
-    #         y=utm_northing,
-    #     )
-
-
-
-
-
-
