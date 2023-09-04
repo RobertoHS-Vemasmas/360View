@@ -1,18 +1,23 @@
+import time
+import pyproj
+
 from qgis.gui import QgsMapToolIdentify
 from qgis.PyQt.QtCore import Qt, QSettings, QThread
 from qgis.PyQt.QtGui import QIcon, QCursor, QPixmap
 from qgis.PyQt.QtWidgets import QAction
-
 from .Geo360Dialog import Geo360Dialog
 from . import config
 from .utils.log import log
 from .utils.qgsutils import qgsutils
-from qgis.core import QgsApplication, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
+from qgis.core import(
+    QgsApplication,
+    QgsCoordinateTransform,
+    QgsCoordinateReferenceSystem,
+    QgsProject,
+    QgsPointXY)
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
-import time
-import pyproj
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):

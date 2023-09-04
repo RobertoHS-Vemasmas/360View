@@ -1,15 +1,14 @@
 from qgis.core import Qgis as QGis
 from qgis.gui import QgsRubberBand
 from qgis.utils import iface
+from .log import log
 from qgis.core import (
     QgsPointXY,
     QgsProject,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsRectangle,
-)
+    QgsRectangle)
 
-from .log import log
 
 class qgsutils(object):
     @staticmethod
