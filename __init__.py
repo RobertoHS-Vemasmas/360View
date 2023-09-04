@@ -23,15 +23,6 @@
 import sys
 from .Geo360 import Geo360
 
-try:
-    sys.path.append("C:\eclipse\plugins\org.python.pydev.core_8.3.0.202104101217\pysrc")
-    sys.path.append(
-        "/home/fragalop/eclipse/plugins/org.python.pydev.core_8.3.0.202104101217/pysrc"
-    )
-except ImportError:
-    None
-
-
 def classFactory(iface):
 
     return Geo360(iface)
