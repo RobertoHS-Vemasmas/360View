@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import QDialog, QWidget, QDockWidget
 from qgis.PyQt.QtGui import QWindow
 from . import config
 from .geom.transformgeom import transformGeometry
-from  .ui.output_ui  import Ui_orbitalDialog
+from .ui.output_ui  import Ui_orbitalDialog
 from .utils.qgsutils import qgsutils
 from qgis.PyQt.QtWebKitWidgets import QWebView, QWebPage
 from qgis.PyQt.QtWebKit import QWebSettings
@@ -33,7 +33,6 @@ from qgis.PyQt.QtNetwork import(
     QNetworkAccessManager,
     QNetworkReply,
     QSslSocket)
-
 
 try:
     from PIL import Image
@@ -88,10 +87,17 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.current_image = self.GetImage()
 
         # Comprobar si existe la imagen
-        if not os.path.exists(self.current_image):
+        if self.current_image is not None and isinstance(self.current_image, str) and os.path.exists(self.current_image):
+            self.CopyFile(self.current_image)
+            self.ChangeUrlViewer(self.DEFAULT_URL)
+        else:
             qgsutils.showUserAndLogMessage(
-                u"Información: ", u"No existe imagen asociada."
+                u"Infornación: ", u"No existe imagen asociada o la ruta es inavlida"
             )
+        # if not os.path.exists(self.current_image):
+        #     qgsutils.showUserAndLogMessage(
+        #         u"Información: ", u"No existe imagen asociada."
+        #     )
             self.resetQgsRubberBand()
             self.ChangeUrlViewer(self.DEFAULT_EMPTY)
             return
@@ -243,14 +249,15 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         """Cambiar visor de URL"""
         self.cef_widget.load(QUrl(new_url))
 
-    def ReloadView(self, newId):
+    def ReloadView(self, x, y):
         """ Recargar visor de imágenes """
         self.setWindowState(
             self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
 
         #  Activará la ventana
         self.activateWindow()
-        self.selected_features = qgsutils.getToFeature(self.layer, newId)
+        ide = None
+        self.selected_features = qgsutils.getToFeature(self.parent, ide)
         self.showFullScreen()
         self.current_image = self.GetImage()
 

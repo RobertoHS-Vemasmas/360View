@@ -104,6 +104,7 @@ class Geo360:
             self.orbitalViewer = Geo360Dialog(
                 self.iface, parent=self, x=x, y=self.y
             )
+            # self.orbitalViewer = Geo360Dialog(self.iface, self.layer, x, y)
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
         else:
             self.orbitalViewer.ReloadView(self.x, self.y)
