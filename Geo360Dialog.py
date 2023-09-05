@@ -257,7 +257,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         #  Activará la ventana
         self.activateWindow()
         ide = None
-        self.selected_features = qgsutils.getToFeature(self.parent, ide)
+        self.selected_features = qgsutils.getToFeature(self.parent)
         self.showFullScreen()
         self.current_image = self.GetImage()
 
