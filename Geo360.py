@@ -44,10 +44,10 @@ class Geo360:
         )
         self.action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu(u"&Equirectangular Viewer", self.action)
+        self.iface.addPluginToMenu(u"&Visor 360°", self.action)
 
     def unload(self):
-        self.iface.removePluginMenu(u"&Equirectangular Viewer", self.action)
+        self.iface.removePluginMenu(u"&Visor 360°", self.action)
         self.iface.removeToolBarIcon(self.action)
         self.close_server()
 
@@ -96,18 +96,24 @@ class Geo360:
         #     )
             # return
 
-    def ShowViewer(self, x=None, y=None):
-        self.x = x
-        self.y = y
+    def ShowViewer(self, x, y):
+        """ Mostrar el visor de imágenes 360° """
+        self.orbitalViewer = Geo360Dialog(self.iface, self, x, y)
+        self.orbitalViewer.show()
 
-        if self.orbitalViewer is None:
-            self.orbitalViewer = Geo360Dialog(
-                self.iface, parent=self, x=x, y=self.y
-            )
-            # self.orbitalViewer = Geo360Dialog(self.iface, self.layer, x, y)
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
-        else:
-            self.orbitalViewer.ReloadView(self.x, self.y)
+
+    # def ShowViewer(self, x=None, y=None):
+    #     self.x = x
+    #     self.y = y
+
+    #     if self.orbitalViewer is None:
+    #         self.orbitalViewer = Geo360Dialog(
+    #             self.iface, parent=self, x=x, y=y
+    #         )
+    #         # self.orbitalViewer = Geo360Dialog(self.iface, self.layer, x, y)
+    #         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
+    #     else:
+    #         self.orbitalViewer.ReloadView(self.x, self.y, ide)
 
 class SelectTool(QgsMapToolIdentify):
     def __init__(self, iface, parent=None, layer=None):
@@ -147,27 +153,27 @@ class SelectTool(QgsMapToolIdentify):
     def activate(self):
         self.canvas.setCursor(self.cursor)
 
-    # def canvasReleaseEvent(self, event):
-    #     x = event.pos().x()
-    #     y = event.pos().y()
-
-    #     point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-    #     self.parent.ShowViewer(
-    #         x=point[0],
-    #         y=point[1],
-    #     )
-
     def canvasReleaseEvent(self, event):
         x = event.pos().x()
         y = event.pos().y()
 
-        canvas_crs = self.canvas.mapSettings().destinationCrs()
-        transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem("EPSG:3857"), QgsProject.instance())
-        point = transform.transform(QgsPointXY(x, y))
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
         self.parent.ShowViewer(
-            x=point.x(),
-            y=point.y(),
+            x=point[0],
+            y=point[1],
         )
+
+    # def canvasReleaseEvent(self, event):
+    #     x = event.pos().x()
+    #     y = event.pos().y()
+
+    #     canvas_crs = self.canvas.mapSettings().destinationCrs()
+    #     transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem("EPSG:3857"), QgsProject.instance())
+    #     point = transform.transform(QgsPointXY(x, y))
+    #     self.parent.ShowViewer(
+    #         x=point.x(),
+    #         y=point.y(),
+    #     )
 
     # def canvasReleaseEvent(self, event):
     #     x = event.pos().x()

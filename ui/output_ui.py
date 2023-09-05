@@ -27,8 +27,6 @@ class Ui_orbitalDialog(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.ViewerLayout = QtWidgets.QGridLayout()
         self.ViewerLayout.setObjectName("ViewerLayout")
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.ViewerLayout.addItem(spacerItem, 0, 0, 1, 1)
         self.verticalLayout_3.addLayout(self.ViewerLayout)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
@@ -38,8 +36,8 @@ class Ui_orbitalDialog(object):
         self.yawLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextSelectableByMouse)
         self.yawLbl.setObjectName("yawLbl")
         self.horizontalLayout.addWidget(self.yawLbl)
-        spacerItem1 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
+        spacerItem = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.btn_back = QtWidgets.QPushButton(self.dockWidgetContents)
         self.btn_back.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon = QtGui.QIcon()
@@ -58,8 +56,8 @@ class Ui_orbitalDialog(object):
         orbitalDialog.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(orbitalDialog)
-        self.btn_back.clicked.connect(orbitalDialog.GetBackNextImage)
-        self.btn_next.clicked.connect(orbitalDialog.GetBackNextImage)
+        self.btn_back.clicked.connect(orbitalDialog.GetBackNextImage) # type: ignore
+        self.btn_next.clicked.connect(orbitalDialog.GetBackNextImage) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(orbitalDialog)
 
     def retranslateUi(self, orbitalDialog):

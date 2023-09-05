@@ -53,7 +53,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     """ Geo360 Dialog Class """
 
-    def __init__(self, iface, parent=None, x=None, y=None):
+    def __init__(self, iface, parent=None, x=None, y=None, layer=None):
 
         QDockWidget.__init__(self)
 
@@ -81,6 +81,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.actualPointDx = None
         self.actualPointSx = None
         self.actualPointOrientation = None
+        self.found = False
 
         # Obtener la ruta de la imagen.
         self.GetImage()
@@ -256,13 +257,12 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         #  Activará la ventana
         self.activateWindow()
-        ide = None
-        self.selected_features = qgsutils.getToFeature(self.parent)
+        self.selected_features = qgsutils.getToFeature(self.layer)
         self.showFullScreen()
         self.current_image = self.GetImage()
 
         # Comprobar si existe la imagen
-        print("Value of self.current_image:", self.current_image)
+        print("Valor de self.current_image: ", self.current_image)
         if not os.path.exists(self.current_image):
             qgsutils.showUserAndLogMessage(
                 u"Información: ", u"No existe imagen asociada."
@@ -294,7 +294,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         for layer in lys:
             if layer.name() == config.layer_name:
-                self.encontrado = True
+                self.found = True
                 self.iface.setActiveLayer(layer)
 
                 f = self.selected_features
@@ -332,22 +332,22 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
                 #  Actualizar función seleccionada
                 self.ReloadView(ids[0])
 
-        if not self.encontrado:
+        if not self.found:
             qgsutils.showUserAndLogMessage(
                 u"Información: ",
                 u"Necesita una capa con imágenes y establecer el nombre en el archivo config.py"
             )
         return
 
-    def FullScreen(self, value):
-        """ Botón de acción de pantalla completa """
-        qgsutils.showUserAndLogMessage(
-            u"Información: ", u"Pantalla completa.", onlyLog=True
-        )
-        if value:
-            self.showFullScreen()
-        else:
-            self.showNormal()
+    # def FullScreen(self, value):
+    #     """ Botón de acción de pantalla completa """
+    #     qgsutils.showUserAndLogMessage(
+    #         u"Información: ", u"Pantalla completa.", onlyLog=True
+    #     )
+    #     if value:
+    #         self.showFullScreen()
+    #     else:
+    #         self.showNormal()
 
     def UpdateOrientation(self, yaw=None):
         """ Actualizar orientación """
