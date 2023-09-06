@@ -1,4 +1,5 @@
 import time
+import os
 
 from qgis.gui import QgsMapToolIdentify
 from qgis.PyQt.QtCore import Qt, QSettings, QThread
@@ -123,35 +124,16 @@ class SelectTool(QgsMapToolIdentify):
         self.layer = layer
         self.parent = parent
 
-        self.cursor = QCursor(
-            QPixmap(
-                [
-                    "16 16 3 1",
-                    "      c None",
-                    ".     c Blue",
-                    "+     c Blue",
-                    "                ",
-                    "       +.+      ",
-                    "      ++.++     ",
-                    "     +.....+    ",
-                    "    +.     .+   ",
-                    "   +.   .   .+  ",
-                    "  +.    .    .+ ",
-                    " ++.    .    .++",
-                    " ... ...+... ...",
-                    " ++.    .    .++",
-                    "  +.    .    .+ ",
-                    "   +.   .   .+  ",
-                    "   ++.     .+   ",
-                    "    ++.....+    ",
-                    "      ++.++     ",
-                    "       +.+      ",
-                ]
-            )
-        )
+        project_root = os.path.dirname(__file__)
+        
+        image_filename = "cursorIcon.png"
+        image_path = os.path.join(project_root, image_filename)
+
+        cursor_image = QPixmap(image_path)
+        self.custom_cursor = QCursor(cursor_image)
 
     def activate(self):
-        self.canvas.setCursor(self.cursor)
+        self.canvas.setCursor(self.custom_cursor)
 
     def canvasReleaseEvent(self, event):
         x = event.pos().x()
