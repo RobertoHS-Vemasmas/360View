@@ -3,7 +3,7 @@
 </p> -->
 
 # 360View
-Este plugin permite la visualización de imágenes equirectangulares, se puede utilizar para cualquier imagen 360 dado que se utiliza la biblioteca Marzipano.
+Este plugin permite la visualización de imágenes equirectangulares, se puede utilizar para cualquier imagen 360 dado que se utiliza la libreria Marzipano.
 
 ## Requisitos previos
 Se requiere la bilioteca Pillow, instalar el paquete Pillow python:
