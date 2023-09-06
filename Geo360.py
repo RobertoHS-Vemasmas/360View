@@ -102,7 +102,6 @@ class Geo360:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
         self.orbitalViewer.show()
 
-
     # def ShowViewer(self, x=None, y=None):
     #     self.x = x
     #     self.y = y
@@ -126,7 +125,7 @@ class SelectTool(QgsMapToolIdentify):
 
         project_root = os.path.dirname(__file__)
         
-        image_filename = "cursorIcon.png"
+        image_filename = "ui/images/cursorIcon.png"
         image_path = os.path.join(project_root, image_filename)
 
         cursor_image = QPixmap(image_path)

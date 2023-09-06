@@ -172,7 +172,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def GetImage(self):
         """ Obtener la imagen seleccionada """
 
-        json = {'Latitud' : self.y, 'Longitud' : self.x} #Se invirtieron los valores de Lat y Lng (x, y)
+        json = {'Latitud' : self.x, 'Longitud' : self.y}
         document = QJsonDocument(json)
         print(document.toJson())
  
