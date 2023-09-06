@@ -48,7 +48,6 @@ class _ViewerPage(QWebPage):
         self.obj = l
         self.newData.emit(l)
 
-
 class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     """ Geo360 Dialog Class """
@@ -149,31 +148,31 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         except OSError:
             pass
 
-    def CopyFile(self, src):
-        """ Copiar archivo de imagen en servidor local """
-        qgsutils.showUserAndLogMessage(
-            u"Información: ", u"Copiando imagen", onlyLog=True
-        )
+    # def CopyFile(self, src):
+    #     """ Copiar archivo de imagen en servidor local """
+    #     qgsutils.showUserAndLogMessage(
+    #         u"Información: ", u"Copiando imagen", onlyLog=True
+    #     )
 
-        src_dir = src
-        dst_dir = self.plugin_path + "/viewer"
+    #     src_dir = src
+    #     dst_dir = self.plugin_path + "/viewer"
 
-        # Copiar imagen en carpeta local.
-        img = Image.open(src_dir)
-        rgb_im = img.convert("RGB")
-        dst_dir = dst_dir + "/image.jpg"
+    #     # Copiar imagen en carpeta local.
+    #     img = Image.open(src_dir)
+    #     rgb_im = img.convert("RGB")
+    #     dst_dir = dst_dir + "/image.jpg"
 
-        try:
-            os.remove(dst_dir)
-        except OSError:
-            pass
+    #     try:
+    #         os.remove(dst_dir)
+    #     except OSError:
+    #         pass
 
-        rgb_im.save(dst_dir)
+    #     rgb_im.save(dst_dir)
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
 
-        json = {'Latitud' : self.x, 'Longitud' : self.y}
+        json = {'Latitud' : self.y, 'Longitud' : self.x} #Se invirtieron los valores de Lat y Lng (x, y)
         document = QJsonDocument(json)
         print(document.toJson())
  
@@ -185,7 +184,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
         req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
         'application/json')
-        print(req)
 
         conf = req.sslConfiguration()
         conf.setPeerVerifyMode(QSslSocket.VerifyNone)
@@ -195,7 +193,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.nam.finished.connect(self.handleResponse)
         self.nam.post(req, document.toJson())
 
-        print(self.nam)
+        print(req)
+        print(conf)
 
     def handleResponse(self, reply):
 
@@ -203,7 +202,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
-            print(bytes_string)
 
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
             req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
@@ -284,6 +282,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def GetBackNextImage(self):
         """ Ir a la imagen de atrás """
         sender = QObject.sender(self)
+        print(sender)
 
         lys = self.canvas.layers()  # Comprobar si la foto está cargada
         if not lys:

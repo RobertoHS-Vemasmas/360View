@@ -56,17 +56,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="btn_back">
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:/images/up.png</normaloff>:/images/up.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="btn_next">
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
@@ -74,6 +63,17 @@
         <property name="icon">
          <iconset>
           <normaloff>:/images/down.png</normaloff>:/images/down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_back">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>:/images/up.png</normaloff>:/images/up.png</iconset>
         </property>
        </widget>
       </item>

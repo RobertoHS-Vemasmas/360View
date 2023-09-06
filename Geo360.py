@@ -1,5 +1,4 @@
 import time
-import pyproj
 
 from qgis.gui import QgsMapToolIdentify
 from qgis.PyQt.QtCore import Qt, QSettings, QThread
@@ -114,7 +113,7 @@ class Geo360:
     #         # self.orbitalViewer = Geo360Dialog(self.iface, self.layer, x, y)
     #         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
     #     else:
-    #         self.orbitalViewer.ReloadView(self.x, self.y, ide)
+    #         self.orbitalViewer.ReloadView(self.x, self.y)
 
 class SelectTool(QgsMapToolIdentify):
     def __init__(self, iface, parent=None, layer=None):
@@ -163,30 +162,3 @@ class SelectTool(QgsMapToolIdentify):
             x=point[0],
             y=point[1],
         )
-
-    # def canvasReleaseEvent(self, event):
-    #     x = event.pos().x()
-    #     y = event.pos().y()
-
-    #     canvas_crs = self.canvas.mapSettings().destinationCrs()
-    #     transform = QgsCoordinateTransform(canvas_crs, QgsCoordinateReferenceSystem("EPSG:3857"), QgsProject.instance())
-    #     point = transform.transform(QgsPointXY(x, y))
-    #     self.parent.ShowViewer(
-    #         x=point.x(),
-    #         y=point.y(),
-    #     )
-
-    # def canvasReleaseEvent(self, event):
-    #     x = event.pos().x()
-    #     y = event.pos().y()
-
-    #     point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-
-    #     crs_dest = QgsCoordinateReferenceSystem('EPSG:32614')
-    #     transform = QgsCoordinateTransform(self.canvas.mapSettings().destinationCrs(), crs_dest, QgsProject.instance())
-    #     transformed_point = transform.transform(point)
-
-    #     self.parent.ShowViewer(
-    #         x=transformed_point.x(),
-    #         y=transformed_point.y(),
-    #     )
