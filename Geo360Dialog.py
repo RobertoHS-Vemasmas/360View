@@ -95,10 +95,10 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             qgsutils.showUserAndLogMessage(
                 u"Infornación: ", u"No existe imagen asociada o la ruta es inavlida"
             )
-        # if not os.path.exists(self.current_image):
-        #     qgsutils.showUserAndLogMessage(
-        #         u"Información: ", u"No existe imagen asociada."
-        #     )
+            # if not os.path.exists(self.current_image):
+            #     qgsutils.showUserAndLogMessage(
+            #     u"Información: ", u"No existe imagen asociada."
+            # )
             self.resetQgsRubberBand()
             self.ChangeUrlViewer(self.DEFAULT_EMPTY)
             return

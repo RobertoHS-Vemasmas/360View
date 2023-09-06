@@ -99,6 +99,7 @@ class Geo360:
     def ShowViewer(self, x, y):
         """ Mostrar el visor de imágenes 360° """
         self.orbitalViewer = Geo360Dialog(self.iface, self, x, y)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.orbitalViewer)
         self.orbitalViewer.show()
 
 
