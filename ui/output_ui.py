@@ -11,7 +11,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from . import icons_rc
 
-
 class Ui_orbitalDialog(object):
     def setupUi(self, orbitalDialog):
         orbitalDialog.setObjectName("orbitalDialog")
@@ -41,7 +40,7 @@ class Ui_orbitalDialog(object):
         self.btn_next = QtWidgets.QPushButton(self.dockWidgetContents)
         self.btn_next.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/images/down.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/down.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_next.setIcon(icon)
         self.btn_next.setObjectName("btn_next")
         self.horizontalLayout.addWidget(self.btn_next)
