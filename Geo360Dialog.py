@@ -50,7 +50,7 @@ class _ViewerPage(QWebPage):
 
 class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
-    """ Geo360 Dialog Class """
+    """Geo360 Dialog Class"""
 
     def __init__(self, iface, parent=None, x=None, y=None, layer=None):
 
@@ -143,10 +143,10 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def RemoveImage(self):
         """ Quitar imagen """
-        try:
-            os.remove(self.plugin_path + "/viewer/image.jpg")
-        except OSError:
-            pass
+        # try:
+            # os.remove(self.plugin_path + "/viewer/image.jpg")
+        # except OSError:
+            # pass
 
     # def CopyFile(self, src):
     #     """ Copiar archivo de imagen en servidor local """
@@ -171,7 +171,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
-
         json = {'Latitud' : self.y, 'Longitud' : self.x} #Se invierten las coordenadas
         document = QJsonDocument(json)
         print(document.toJson())
@@ -197,20 +196,15 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         print(conf)
 
     def handleResponse(self, reply):
-
         er = reply.error()
-
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
-
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
-            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
-            'application/json')
+            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, 'application/json')
 
             self.nam = QNetworkAccessManager()
             self.nam.finished.connect(self.handleRecorrido)
             self.nam.post(req, bytes_string)
-            
         else:
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
@@ -218,27 +212,22 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def handelRecorrdio(self, reply):
         er = reply.error()
-
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             puntos = jsonO['puntos'].toArray()
             punto = puntos[0].toObject()
-
             imagenNombre = punto['imagen']
 
             if imagenNombre.toString().endswith('.jpg'):
                  imagenNombre = imagenNombre + ".jpg"
 
             self.path = 'https://10.16.106.74/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre,
-
             self.current_image = self.path
 
             qgsutils.showUserAndLogMessage(
                 u"Información: ", str(self.path), onlyLog=True
             )
-
-
         else:
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
@@ -249,9 +238,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.cef_widget.load(QUrl(new_url))
 
     def ReloadView(self, x, y):
-        """ Recargar visor de imágenes """
-        self.setWindowState(
-            self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        """Recargar visor de imágenes"""
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
 
         #  Activará la ventana
         self.activateWindow()
@@ -333,8 +321,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         if not self.found:
             qgsutils.showUserAndLogMessage(
-                u"Información: ",
-                u"Necesita una capa con imágenes y establecer el nombre en el archivo config.py"
+                u"Información: ", u"Necesita una capa con imágenes y establecer el nombre en el archivo config.py"
             )
         return
 
@@ -444,30 +431,30 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.canvas.mapSettings().destinationCrs().authid(),
         )
 
-        self.positionDx = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
-        self.positionDx.setWidth(3)
-        self.positionDx.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionDx.setIconSize(3)
-        self.positionDx.setColor(Qt.blue)
-        self.positionSx = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        )
-        self.positionSx.setWidth(3)
-        self.positionSx.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionSx.setIconSize(3)
-        self.positionSx.setColor(Qt.blue)
-        self.positionInt = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        )
-        self.positionInt.setWidth(6)
-        self.positionInt.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionInt.setIconSize(3)
-        self.positionInt.setColor(Qt.blue)
+        # self.positionDx = QgsRubberBand(
+        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
+        # self.positionDx.setWidth(3)
+        # self.positionDx.setIcon(QgsRubberBand.ICON_BOX)
+        # self.positionDx.setIconSize(3)
+        # self.positionDx.setColor(Qt.blue)
+        # self.positionSx = QgsRubberBand(
+        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
+        # )
+        # self.positionSx.setWidth(3)
+        # self.positionSx.setIcon(QgsRubberBand.ICON_BOX)
+        # self.positionSx.setIconSize(3)
+        # self.positionSx.setColor(Qt.blue)
+        # self.positionInt = QgsRubberBand(
+        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
+        # )
+        # self.positionInt.setWidth(6)
+        # self.positionInt.setIcon(QgsRubberBand.ICON_BOX)
+        # self.positionInt.setIconSize(3)
+        # self.positionInt.setColor(Qt.blue)
 
-        self.positionDx.addPoint(self.actualPointDx)
-        self.positionSx.addPoint(self.actualPointDx)
-        self.positionInt.addPoint(self.actualPointDx)
+        # self.positionDx.addPoint(self.actualPointDx)
+        # self.positionSx.addPoint(self.actualPointDx)
+        # self.positionInt.addPoint(self.actualPointDx)
 
     def closeEvent(self, _):
         """ Cerrar cuadro de diálogo """
