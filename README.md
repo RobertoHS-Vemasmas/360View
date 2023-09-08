@@ -10,10 +10,10 @@ Se requiere la bilioteca Pillow, instalar el paquete Pillow python:
 
 `python3 -m pip install pillow`
 
-Convertir archivos ui:
+Convertir archivos de interfaz de usuario:
 
 `pyuic5 -o output.py ui_orbitalDialog.ui`
 
-Convertir resource files:
+Convertir archivos de recursos:
 
 `pyrcc5 icons.qrc -o icons_rc.py`
