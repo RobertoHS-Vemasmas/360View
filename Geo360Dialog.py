@@ -338,15 +338,15 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             )
         return
 
-    # def FullScreen(self, value):
-    #     """ Botón de acción de pantalla completa """
-    #     qgsutils.showUserAndLogMessage(
-    #         u"Información: ", u"Pantalla completa.", onlyLog=True
-    #     )
-    #     if value:
-    #         self.showFullScreen()
-    #     else:
-    #         self.showNormal()
+    def FullScreen(self, value):
+        """ Botón de acción de pantalla completa """
+        qgsutils.showUserAndLogMessage(
+            u"Información: ", u"Pantalla completa.", onlyLog=True
+        )
+        if value:
+            self.showFullScreen()
+        else:
+            self.showNormal()
 
     def UpdateOrientation(self, yaw=None):
         """ Actualizar orientación """

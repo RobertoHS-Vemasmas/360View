@@ -62,7 +62,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>:/down.png</normaloff>:/down.png</iconset>
+          <normaloff>images/up.png</normaloff>images/up.png</iconset>
         </property>
        </widget>
       </item>
@@ -73,7 +73,34 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>:/images/up.png</normaloff>:/images/up.png</iconset>
+          <normaloff>images/down.png</normaloff>images/down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>images/fullscreen.png</normaloff>images/fullscreen.png</iconset>
         </property>
        </widget>
       </item>
