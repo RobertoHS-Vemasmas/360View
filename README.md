@@ -11,7 +11,9 @@ Se requiere la bilioteca Pillow, instalar el paquete Pillow python:
 `python3 -m pip install pillow`
 
 Convertir archivos ui:
+
 `pyuic5 -o output.py ui_orbitalDialog.ui`
 
-Convertir resource files
+Convertir resource files:
+
 `pyrcc5 icons.qrc -o icons_rc.py`
