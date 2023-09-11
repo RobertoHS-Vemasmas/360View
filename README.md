@@ -13,3 +13,8 @@ Convertir archivos de interfaz de usuario:
 Convertir archivos de recursos:
 
 `pyrcc5 icons.qrc -o icons_rc.py`
+
+Configurar el sistema de coordenadas del proyecto QGIS
+
+Sistema de referencia de coordenadas: `WSG 84`
+ID de la autoridad: `EPSG:4326`
