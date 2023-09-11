@@ -71,16 +71,16 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.parent = parent
 
         # Orientación de la imagen
-        self.yaw = math.pi
-        self.bearing = None
+        # self.yaw = math.pi
+        # self.bearing = None
 
         self.x = x
         self.y = y
-
-        self.actualPointDx = None
-        self.actualPointSx = None
-        self.actualPointOrientation = None
         self.found = False
+        self.actualPointOrientation = None
+        
+        # self.actualPointDx = None
+        # self.actualPointSx = None
 
         # Obtener la ruta de la imagen.
         self.GetImage()
@@ -171,6 +171,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
+        self.x = round(self.x, 5)
+        self.y = round(self.y, 5)
         json = {'Latitud' : self.y, 'Longitud' : self.x} #Se invierten las coordenadas
         document = QJsonDocument(json)
         print(document.toJson())
@@ -193,7 +195,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.nam.post(req, document.toJson())
 
         print(req)
-        print(conf)
 
     def handleResponse(self, reply):
         er = reply.error()
@@ -325,111 +326,111 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             )
         return
 
-    def FullScreen(self, value):
-        """ Botón de acción de pantalla completa """
-        qgsutils.showUserAndLogMessage(
-            u"Información: ", u"Pantalla completa.", onlyLog=True
-        )
-        if value:
-            self.showFullScreen()
-        else:
-            self.showNormal()
+    # def FullScreen(self, value):
+    #     """ Botón de acción de pantalla completa """
+    #     qgsutils.showUserAndLogMessage(
+    #         u"Información: ", u"Pantalla completa.", onlyLog=True
+    #     )
+    #     if value:
+    #         self.showFullScreen()
+    #     else:
+    #         self.showNormal()
 
-    def UpdateOrientation(self, yaw=None):
-        """ Actualizar orientación """
-        self.bearing = self.selected_features.attribute(config.column_yaw)
-        try:
-            self.actualPointOrientation.reset()
-        except Exception:
-            pass
+    # def UpdateOrientation(self, yaw=None):
+    #     """ Actualizar orientación """
+    #     self.bearing = self.selected_features.attribute(config.column_yaw)
+    #     try:
+    #         self.actualPointOrientation.reset()
+    #     except Exception:
+    #         pass
 
-        self.actualPointOrientation = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-        )
-        # Indicador azul de posicionamiento en el mapa.
-        self.actualPointOrientation.setColor(Qt.blue)
-        self.actualPointOrientation.setWidth(2)
-        self.actualPointOrientation.addPoint(self.actualPointDx)
-
-        # End Point
-        CS = self.canvas.mapUnitsPerPixel() * 15  # Determina el tamaño del puntero
-        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
-
-        self.actualPointOrientation.addPoint(
-            QgsPointXY(float(A1x), float(A1y)))
-
-        # Ángulo de visión
-        if yaw is not None:
-            angle = float(self.bearing + yaw) * math.pi / -180  # Velocidad de giro (línea azul)
-        else:
-            angle = float(self.bearing) * math.pi / -180  
-
-        tmpGeom = self.actualPointOrientation.asGeometry()
-
-        self.actualPointOrientation.setToGeometry(
-            self.rotateTool.rotate(
-                tmpGeom, self.actualPointDx, angle),
-            self.dumLayer
-        )
-
-    def setOrientation(self, yaw=None):
-        """ Establecer la orientación en la primera vez """
-        self.bearing = self.selected_features.attribute(config.column_yaw)
-
-        originalPoint = self.selected_features.geometry().asPoint()
-        self.actualPointDx = qgsutils.convertProjection(
-            self.x,
-            self.y,
-            self.layer.crs().authid(),
-            self.canvas.mapSettings().destinationCrs().authid(),
-        )
-
-        self.actualPointOrientation = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-        )
-        self.actualPointOrientation.setColor(Qt.blue)
-        self.actualPointOrientation.setWidth(3)
-
-        self.actualPointOrientation.addPoint(self.actualPointDx)
+    #     self.actualPointOrientation = QgsRubberBand(
+    #         self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
+    #     )
+    #     # Indicador azul de posicionamiento en el mapa.
+    #     self.actualPointOrientation.setColor(Qt.blue)
+    #     self.actualPointOrientation.setWidth(2)
+    #     self.actualPointOrientation.addPoint(self.actualPointDx)
 
         # End Point
-        CS = self.canvas.mapUnitsPerPixel() * 15
-        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
+        # CS = self.canvas.mapUnitsPerPixel() * 15  # Determina el tamaño del puntero
+        # A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
+        # A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
 
-        self.actualPointOrientation.addPoint(
-            QgsPointXY(float(A1x), float(A1y)))
+        # self.actualPointOrientation.addPoint(
+        #     QgsPointXY(float(A1x), float(A1y)))
 
         # Ángulo de visión
-        if yaw is not None:
-            angle = float(self.bearing + yaw) * math.pi / -180
-        else:
-            angle = float(self.bearing) * math.pi / -180
+        # if yaw is not None:
+        #     angle = float(self.bearing + yaw) * math.pi / -180  # Velocidad de giro (línea azul)
+        # else:
+        #     angle = float(self.bearing) * math.pi / -180  
 
-        tmpGeom = self.actualPointOrientation.asGeometry()
+        # tmpGeom = self.actualPointOrientation.asGeometry()
 
-        self.rotateTool = transformGeometry()
-        epsg = self.canvas.mapSettings().destinationCrs().authid()
-        self.dumLayer = QgsVectorLayer(
-            f"Point?crs={epsg}", "temporary_points", "memory"
-        )
-        self.actualPointOrientation.setToGeometry(
-            self.rotateTool.rotate(
-                tmpGeom, self.actualPointDx, angle), self.dumLayer
-        )
+        # self.actualPointOrientation.setToGeometry(
+        #     self.rotateTool.rotate(
+        #         tmpGeom, self.actualPointDx, angle),
+        #     self.dumLayer
+        # )
 
-    def setPosition(self):
-        """ Establecer la posición RubberBand """
+    # def setOrientation(self, yaw=None):
+    #     """ Establecer la orientación en la primera vez """
+    #     self.bearing = self.selected_features.attribute(config.column_yaw)
 
-        # Punto de transformación
-        originalPoint = self.selected_features.geometry().asPoint()
-        self.actualPointDx = qgsutils.convertProjection(
-            originalPoint.x(),
-            originalPoint.y(),
-            "EPSG:3857",
-            self.canvas.mapSettings().destinationCrs().authid(),
-        )
+    #     originalPoint = self.selected_features.geometry().asPoint()
+    #     self.actualPointDx = qgsutils.convertProjection(
+    #         self.x,
+    #         self.y,
+    #         self.layer.crs().authid(),
+    #         self.canvas.mapSettings().destinationCrs().authid(),
+    #     )
+
+    #     self.actualPointOrientation = QgsRubberBand(
+    #         self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
+    #     )
+    #     self.actualPointOrientation.setColor(Qt.blue)
+    #     self.actualPointOrientation.setWidth(3)
+
+    #     self.actualPointOrientation.addPoint(self.actualPointDx)
+
+        # End Point
+        # CS = self.canvas.mapUnitsPerPixel() * 15
+        # A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
+        # A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
+
+        # self.actualPointOrientation.addPoint(
+        #     QgsPointXY(float(A1x), float(A1y)))
+
+        # # Ángulo de visión
+        # if yaw is not None:
+        #     angle = float(self.bearing + yaw) * math.pi / -180
+        # else:
+        #     angle = float(self.bearing) * math.pi / -180
+
+        # tmpGeom = self.actualPointOrientation.asGeometry()
+
+        # self.rotateTool = transformGeometry()
+        # epsg = self.canvas.mapSettings().destinationCrs().authid()
+        # self.dumLayer = QgsVectorLayer(
+        #     f"Point?crs={epsg}", "temporary_points", "memory"
+        # )
+        # self.actualPointOrientation.setToGeometry(
+        #     self.rotateTool.rotate(
+        #         tmpGeom, self.actualPointDx, angle), self.dumLayer
+        # )
+
+    # def setPosition(self):
+    #     """ Establecer la posición RubberBand """
+
+    #     # Punto de transformación
+    #     originalPoint = self.selected_features.geometry().asPoint()
+    #     self.actualPointDx = qgsutils.convertProjection(
+    #         originalPoint.x(),
+    #         originalPoint.y(),
+    #         "EPSG:3857",
+    #         self.canvas.mapSettings().destinationCrs().authid(),
+    #     )
 
         # self.positionDx = QgsRubberBand(
         #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
