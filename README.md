@@ -16,6 +16,6 @@ Convertir archivos de recursos:
 
 Configurar el sistema de coordenadas del proyecto QGIS
 
-Sistema de referencia de coordenadas: `WSG 84`
+-Sistema de referencia de coordenadas: `WSG 84`
 
-ID de la autoridad: `EPSG:4326`
+-ID de la autoridad: `EPSG:4326`
