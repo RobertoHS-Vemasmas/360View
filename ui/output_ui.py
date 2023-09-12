@@ -30,11 +30,6 @@ class Ui_orbitalDialog(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.yawLbl = QtWidgets.QLabel(self.dockWidgetContents)
-        self.yawLbl.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
-        self.yawLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextSelectableByMouse)
-        self.yawLbl.setObjectName("yawLbl")
-        self.horizontalLayout.addWidget(self.yawLbl)
         spacerItem = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.btn_next = QtWidgets.QPushButton(self.dockWidgetContents)
@@ -53,14 +48,6 @@ class Ui_orbitalDialog(object):
         self.horizontalLayout.addWidget(self.btn_back)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
-        self.pushButton = QtWidgets.QPushButton(self.dockWidgetContents)
-        self.pushButton.setEnabled(False)
-        self.pushButton.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("images/fullscreen.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton.setIcon(icon2)
-        self.pushButton.setObjectName("pushButton")
-        self.horizontalLayout.addWidget(self.pushButton)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         orbitalDialog.setWidget(self.dockWidgetContents)
 
@@ -72,4 +59,3 @@ class Ui_orbitalDialog(object):
     def retranslateUi(self, orbitalDialog):
         _translate = QtCore.QCoreApplication.translate
         orbitalDialog.setWindowTitle(_translate("orbitalDialog", "Visor de imágenes 360°"))
-        self.yawLbl.setText(_translate("orbitalDialog", "Yaw:"))
