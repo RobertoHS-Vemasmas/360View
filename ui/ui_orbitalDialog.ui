@@ -49,7 +49,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/up.png</normaloff>images/up.png</iconset>
+          <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
         </property>
        </widget>
       </item>
@@ -60,7 +60,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/down.png</normaloff>images/down.png</iconset>
+          <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
         </property>
        </widget>
       </item>

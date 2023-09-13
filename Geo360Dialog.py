@@ -210,17 +210,18 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
             error_message = reply.errorString()
-            qgsutils.showUserAndLogMessage(
-            u"Error: ", f"Error al acceder a {error_url}, Código: {error_code}, Mensaje: {error_message}"
-        )
+        #     qgsutils.showUserAndLogMessage(
+        #     u"Error: ", f"Error al acceder a {error_url}, Código: {error_code}, Mensaje: {error_message}"
+        # )
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
             print("Error 1: ", error_code)
             print("Error 2: ", error_url)
             print("Error 3: ", error_message)
+            print("Error 4: ", er)
 
-    def handelRecorrdio(self, reply):
+    def handleRecorrdio(self, reply):
         er = reply.error()
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
@@ -242,8 +243,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
-
-            print("Error 4: ", self.current_image)
 
     def ChangeUrlViewer(self, new_url):
         """Cambiar visor de URL"""
