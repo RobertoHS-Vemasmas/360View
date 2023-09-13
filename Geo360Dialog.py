@@ -69,6 +69,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
         self.parent = parent
+        self.selected_features = None
 
         # Orientación de la imagen
         # self.yaw = math.pi
@@ -84,10 +85,10 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         # Obtener la ruta de la imagen.
         self.GetImage()
-        self.current_image = self.GetImage()
+        # self.current_image = self.GetImage()
 
         # Comprobar si existe la imagen
-        if self.current_image is not None and isinstance(self.current_image, str) and os.path.exists(self.current_image):
+        if self.current_image is not None and isinstance(self.current_image, str):
             self.CopyFile(self.current_image)
             self.ChangeUrlViewer(self.DEFAULT_URL)
         else:
@@ -148,32 +149,32 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         # except OSError:
             # pass
 
-    # def CopyFile(self, src):
-    #     """ Copiar archivo de imagen en servidor local """
-    #     qgsutils.showUserAndLogMessage(
-    #         u"Información: ", u"Copiando imagen", onlyLog=True
-    #     )
+    def CopyFile(self, src):
+        """ Copiar archivo de imagen en servidor local """
+        qgsutils.showUserAndLogMessage(
+            u"Información: ", u"Copiando imagen", onlyLog=True
+        )
 
-    #     src_dir = src
-    #     dst_dir = self.plugin_path + "/viewer"
+        src_dir = src
+        dst_dir = self.plugin_path + "/viewer"
 
-    #     # Copiar imagen en carpeta local.
-    #     img = Image.open(src_dir)
-    #     rgb_im = img.convert("RGB")
-    #     dst_dir = dst_dir + "/image.jpg"
+        # Copiar imagen en carpeta local.
+        img = Image.open(src_dir)
+        rgb_im = img.convert("RGB")
+        dst_dir = dst_dir + "/image.jpg"
 
-    #     try:
-    #         os.remove(dst_dir)
-    #     except OSError:
-    #         pass
+        try:
+            os.remove(dst_dir)
+        except OSError:
+            pass
 
-    #     rgb_im.save(dst_dir)
+        rgb_im.save(dst_dir)
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
         self.x = round(self.x, 5)
         self.y = round(self.y, 5)
-        json = {'Latitud' : self.y, 'Longitud' : self.x} #Se invierten las coordenadas
+        json = {'latitud' : self.y, 'longitud' : self.x} #Se invierten las coordenadas
         document = QJsonDocument(json)
         print(document.toJson())
  
@@ -183,6 +184,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         # print(data)
 
         req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
+        # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/existenRecorridos'))
         req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
         'application/json')
 
@@ -199,13 +201,30 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
     def handleResponse(self, reply):
         er = reply.error()
         if er == QNetworkReply.NetworkError.NoError:
-            bytes_string = reply.readAll()
+
+           bytes_string = reply.readAll()
+           print("Error 6: ", bytes_string)
+           jsonO = QJsonDocument.fromJson(bytes_string)
+           cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
+           print("Error",cantidad_recorrido)
+
+           if cantidad_recorrido > 0:
+            self.x = round(self.x, 5)
+            self.y = round(self.y, 5)
+            json = {'latitud' : self.y, 'longitud' : self.x} #Se invierten las coordenadas
+            document = QJsonDocument(json)
+
             req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
+            # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/obtenerRecorridos'))
             req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, 'application/json')
 
-            self.nam = QNetworkAccessManager()
-            self.nam.finished.connect(self.handleRecorrido)
-            self.nam.post(req, bytes_string)
+            conf = req.sslConfiguration()
+            conf.setPeerVerifyMode(QSslSocket.VerifyNone)
+            req.setSslConfiguration(conf)
+
+            self.nam2 = QNetworkAccessManager()
+            self.nam2.finished.connect(self.handleRecorrido)
+            self.nam2.post(req, document.toJson())
         else:
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
@@ -221,28 +240,51 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             print("Error 3: ", error_message)
             print("Error 4: ", er)
 
-    def handleRecorrdio(self, reply):
+    def handleRecorrido(self, reply):
         er = reply.error()
         if er == QNetworkReply.NetworkError.NoError:
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             puntos = jsonO['puntos'].toArray()
             punto = puntos[0].toObject()
-            imagenNombre = punto['imagen']
+            imagenNombre = punto['imagen'].toString()
 
-            if imagenNombre.toString().endswith('.jpg'):
+            if not imagenNombre.endswith('.jpg'):
                  imagenNombre = imagenNombre + ".jpg"
 
-            self.path = 'https://10.16.106.74/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre,
+
+
+            self.path = 'https://10.16.106.74/geo/360/' + punto['zona'].toString() + "/" + punto['recorrido'].toString() + "/" + imagenNombre,
+            # self.path = 'https://10.0.1.8/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre,
             self.current_image = self.path
+
+            print(self.path)
+
 
             qgsutils.showUserAndLogMessage(
                 u"Información: ", str(self.path), onlyLog=True
             )
         else:
+            error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+            error_url = reply.url().toString()
+            error_message = reply.errorString()
+        #     qgsutils.showUserAndLogMessage(
+        #     u"Error: ", f"Error al acceder a {error_url}, Código: {error_code}, Mensaje: {error_message}"
+        # )
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
+            print("Error 1: ", error_code)
+            print("Error 2: ", error_url)
+            print("Error 3: ", error_message)
+            print("Error 4: ", er)
+            # qgsutils.showUserAndLogMessage(
+            #     u"Error: ", reply.errorString()
+            # )
+            
+            # print("Error 6: ", punto)
+            # print("Error 7: ", json0)
+            # print("Error 8: ", self.path)
 
     def ChangeUrlViewer(self, new_url):
         """Cambiar visor de URL"""
@@ -336,136 +378,136 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             )
         return
 
-    # def FullScreen(self, value):
-    #     """ Botón de acción de pantalla completa """
-    #     qgsutils.showUserAndLogMessage(
-    #         u"Información: ", u"Pantalla completa.", onlyLog=True
-    #     )
-    #     if value:
-    #         self.showFullScreen()
-    #     else:
-    #         self.showNormal()
+    def FullScreen(self, value):
+        """ Botón de acción de pantalla completa """
+        qgsutils.showUserAndLogMessage(
+            u"Información: ", u"Pantalla completa.", onlyLog=True
+        )
+        if value:
+            self.showFullScreen()
+        else:
+            self.showNormal()
 
-    # def UpdateOrientation(self, yaw=None):
-    #     """ Actualizar orientación """
-    #     self.bearing = self.selected_features.attribute(config.column_yaw)
-    #     try:
-    #         self.actualPointOrientation.reset()
-    #     except Exception:
-    #         pass
+    def UpdateOrientation(self, yaw=None):
+        """ Actualizar orientación """
+        self.bearing = self.selected_features.attribute(config.column_yaw)
+        try:
+            self.actualPointOrientation.reset()
+        except Exception:
+            pass
 
-    #     self.actualPointOrientation = QgsRubberBand(
-    #         self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-    #     )
-    #     # Indicador azul de posicionamiento en el mapa.
-    #     self.actualPointOrientation.setColor(Qt.blue)
-    #     self.actualPointOrientation.setWidth(2)
-    #     self.actualPointOrientation.addPoint(self.actualPointDx)
+        self.actualPointOrientation = QgsRubberBand(
+            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
+        )
+        # Indicador azul de posicionamiento en el mapa.
+        self.actualPointOrientation.setColor(Qt.blue)
+        self.actualPointOrientation.setWidth(2)
+        self.actualPointOrientation.addPoint(self.actualPointDx)
 
         # End Point
-        # CS = self.canvas.mapUnitsPerPixel() * 15  # Determina el tamaño del puntero
-        # A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        # A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
+        CS = self.canvas.mapUnitsPerPixel() * 15  # Determina el tamaño del puntero
+        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
+        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
 
-        # self.actualPointOrientation.addPoint(
-        #     QgsPointXY(float(A1x), float(A1y)))
+        self.actualPointOrientation.addPoint(
+            QgsPointXY(float(A1x), float(A1y)))
 
         # Ángulo de visión
-        # if yaw is not None:
-        #     angle = float(self.bearing + yaw) * math.pi / -180  # Velocidad de giro (línea azul)
-        # else:
-        #     angle = float(self.bearing) * math.pi / -180  
+        if yaw is not None:
+            angle = float(self.bearing + yaw) * math.pi / -180  # Velocidad de giro (línea azul)
+        else:
+            angle = float(self.bearing) * math.pi / -180  
 
-        # tmpGeom = self.actualPointOrientation.asGeometry()
+        tmpGeom = self.actualPointOrientation.asGeometry()
 
-        # self.actualPointOrientation.setToGeometry(
-        #     self.rotateTool.rotate(
-        #         tmpGeom, self.actualPointDx, angle),
-        #     self.dumLayer
-        # )
+        self.actualPointOrientation.setToGeometry(
+            self.rotateTool.rotate(
+                tmpGeom, self.actualPointDx, angle),
+            self.dumLayer
+        )
 
-    # def setOrientation(self, yaw=None):
-    #     """ Establecer la orientación en la primera vez """
-    #     self.bearing = self.selected_features.attribute(config.column_yaw)
+    def setOrientation(self, yaw=None):
+        """ Establecer la orientación en la primera vez """
+        self.bearing = self.selected_features.attribute(config.column_yaw)
 
-    #     originalPoint = self.selected_features.geometry().asPoint()
-    #     self.actualPointDx = qgsutils.convertProjection(
-    #         self.x,
-    #         self.y,
-    #         self.layer.crs().authid(),
-    #         self.canvas.mapSettings().destinationCrs().authid(),
-    #     )
+        originalPoint = self.selected_features.geometry().asPoint()
+        self.actualPointDx = qgsutils.convertProjection(
+            self.x,
+            self.y,
+            self.layer.crs().authid(),
+            self.canvas.mapSettings().destinationCrs().authid(),
+        )
 
-    #     self.actualPointOrientation = QgsRubberBand(
-    #         self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-    #     )
-    #     self.actualPointOrientation.setColor(Qt.blue)
-    #     self.actualPointOrientation.setWidth(3)
+        self.actualPointOrientation = QgsRubberBand(
+            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
+        )
+        self.actualPointOrientation.setColor(Qt.blue)
+        self.actualPointOrientation.setWidth(3)
 
-    #     self.actualPointOrientation.addPoint(self.actualPointDx)
+        self.actualPointOrientation.addPoint(self.actualPointDx)
 
         # End Point
-        # CS = self.canvas.mapUnitsPerPixel() * 15
-        # A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        # A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
+        CS = self.canvas.mapUnitsPerPixel() * 15
+        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
+        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
 
-        # self.actualPointOrientation.addPoint(
-        #     QgsPointXY(float(A1x), float(A1y)))
+        self.actualPointOrientation.addPoint(
+            QgsPointXY(float(A1x), float(A1y)))
 
-        # # Ángulo de visión
-        # if yaw is not None:
-        #     angle = float(self.bearing + yaw) * math.pi / -180
-        # else:
-        #     angle = float(self.bearing) * math.pi / -180
+        # Ángulo de visión
+        if yaw is not None:
+            angle = float(self.bearing + yaw) * math.pi / -180
+        else:
+            angle = float(self.bearing) * math.pi / -180
 
-        # tmpGeom = self.actualPointOrientation.asGeometry()
+        tmpGeom = self.actualPointOrientation.asGeometry()
 
-        # self.rotateTool = transformGeometry()
-        # epsg = self.canvas.mapSettings().destinationCrs().authid()
-        # self.dumLayer = QgsVectorLayer(
-        #     f"Point?crs={epsg}", "temporary_points", "memory"
-        # )
-        # self.actualPointOrientation.setToGeometry(
-        #     self.rotateTool.rotate(
-        #         tmpGeom, self.actualPointDx, angle), self.dumLayer
-        # )
+        self.rotateTool = transformGeometry()
+        epsg = self.canvas.mapSettings().destinationCrs().authid()
+        self.dumLayer = QgsVectorLayer(
+            f"Point?crs={epsg}", "temporary_points", "memory"
+        )
+        self.actualPointOrientation.setToGeometry(
+            self.rotateTool.rotate(
+                tmpGeom, self.actualPointDx, angle), self.dumLayer
+        )
 
-    # def setPosition(self):
-    #     """ Establecer la posición RubberBand """
+    def setPosition(self):
+        """ Establecer la posición RubberBand """
 
-    #     # Punto de transformación
-    #     originalPoint = self.selected_features.geometry().asPoint()
-    #     self.actualPointDx = qgsutils.convertProjection(
-    #         originalPoint.x(),
-    #         originalPoint.y(),
-    #         "EPSG:3857",
-    #         self.canvas.mapSettings().destinationCrs().authid(),
-    #     )
+        # Punto de transformación
+        originalPoint = self.selected_features.geometry().asPoint()
+        self.actualPointDx = qgsutils.convertProjection(
+            originalPoint.x(),
+            originalPoint.y(),
+            "EPSG:3857",
+            self.canvas.mapSettings().destinationCrs().authid(),
+        )
 
-        # self.positionDx = QgsRubberBand(
-        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
-        # self.positionDx.setWidth(3)
-        # self.positionDx.setIcon(QgsRubberBand.ICON_BOX)
-        # self.positionDx.setIconSize(3)
-        # self.positionDx.setColor(Qt.blue)
-        # self.positionSx = QgsRubberBand(
-        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        # )
-        # self.positionSx.setWidth(3)
-        # self.positionSx.setIcon(QgsRubberBand.ICON_BOX)
-        # self.positionSx.setIconSize(3)
-        # self.positionSx.setColor(Qt.blue)
-        # self.positionInt = QgsRubberBand(
-        #     self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        # )
-        # self.positionInt.setWidth(6)
-        # self.positionInt.setIcon(QgsRubberBand.ICON_BOX)
-        # self.positionInt.setIconSize(3)
-        # self.positionInt.setColor(Qt.blue)
+        self.positionDx = QgsRubberBand(
+            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
+        self.positionDx.setWidth(3)
+        self.positionDx.setIcon(QgsRubberBand.ICON_BOX)
+        self.positionDx.setIconSize(3)
+        self.positionDx.setColor(Qt.blue)
+        self.positionSx = QgsRubberBand(
+            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
+        )
+        self.positionSx.setWidth(3)
+        self.positionSx.setIcon(QgsRubberBand.ICON_BOX)
+        self.positionSx.setIconSize(3)
+        self.positionSx.setColor(Qt.blue)
+        self.positionInt = QgsRubberBand(
+            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
+        )
+        self.positionInt.setWidth(6)
+        self.positionInt.setIcon(QgsRubberBand.ICON_BOX)
+        self.positionInt.setIconSize(3)
+        self.positionInt.setColor(Qt.blue)
 
-        # self.positionDx.addPoint(self.actualPointDx)
-        # self.positionSx.addPoint(self.actualPointDx)
-        # self.positionInt.addPoint(self.actualPointDx)
+        self.positionDx.addPoint(self.actualPointDx)
+        self.positionSx.addPoint(self.actualPointDx)
+        self.positionInt.addPoint(self.actualPointDx)
 
     def closeEvent(self, _):
         """ Cerrar cuadro de diálogo """
@@ -484,3 +526,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.actualPointOrientation.reset()
         except Exception:
             None
+
+
+            
