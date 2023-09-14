@@ -71,54 +71,24 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.parent = parent
         self.selected_features = None
 
-        # Orientación de la imagen
-        # self.yaw = math.pi
-        # self.bearing = None
-
         self.x = x
         self.y = y
         self.found = False
         self.actualPointOrientation = None
         
-        # self.actualPointDx = None
-        # self.actualPointSx = None
-
         # Obtener la ruta de la imagen.
+        self.current_image = None
+        self.imagenesRecorrido = []
+        self.currentIndex = 0
         self.GetImage()
-        # self.current_image = self.GetImage()
 
         # Comprobar si existe la imagen
-        if self.current_image is not None and isinstance(self.current_image, str):
-            self.CopyFile(self.current_image)
-            self.ChangeUrlViewer(self.DEFAULT_URL)
-        else:
-            qgsutils.showUserAndLogMessage(
-                u"Infornación: ", u"No existe imagen asociada o la ruta es inavlida"
-            )
-            # if not os.path.exists(self.current_image):
-            #     qgsutils.showUserAndLogMessage(
-            #     u"Información: ", u"No existe imagen asociada."
-            # )
-            self.resetQgsRubberBand()
-            self.ChangeUrlViewer(self.DEFAULT_EMPTY)
-            return
-
-        # Copiar el archivo al servidor local
-        self.CopyFile(self.current_image)
-
-        # Establecer RubberBand
-        self.resetQgsRubberBand()
-        self.setOrientation()
-        self.setPosition()
-
-        self.setOrientation(yaw=-45)
-
-    def onNewData(self, data):
-        try:
-            newYaw = float(data[0])
-            self.UpdateOrientation(yaw=newYaw)
-        except:
-            None
+        # print(self.current_image)
+        # print("imagenesRecorrido", self.imagenesRecorrido)
+        # print("CURRENT IMAGE", self.current_image)
+        # print("IS NONE", self.current_image is not None)
+        # print("ISINSTANCE", isinstance(self.current_image, str))
+      
 
     def CreateViewer(self):
         """ Crear visor """
@@ -136,39 +106,10 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         pano_view_settings.setAttribute(QWebSettings.JavascriptEnabled, True)
 
         self.page = _ViewerPage()
-        self.page.newData.connect(self.onNewData)
         self.cef_widget.setPage(self.page)
 
         self.cef_widget.load(QUrl(self.DEFAULT_URL))
         self.ViewerLayout.addWidget(self.cef_widget, 1, 0)
-
-    def RemoveImage(self):
-        """ Quitar imagen """
-        # try:
-            # os.remove(self.plugin_path + "/viewer/image.jpg")
-        # except OSError:
-            # pass
-
-    def CopyFile(self, src):
-        """ Copiar archivo de imagen en servidor local """
-        qgsutils.showUserAndLogMessage(
-            u"Información: ", u"Copiando imagen", onlyLog=True
-        )
-
-        src_dir = src
-        dst_dir = self.plugin_path + "/viewer"
-
-        # Copiar imagen en carpeta local.
-        img = Image.open(src_dir)
-        rgb_im = img.convert("RGB")
-        dst_dir = dst_dir + "/image.jpg"
-
-        try:
-            os.remove(dst_dir)
-        except OSError:
-            pass
-
-        rgb_im.save(dst_dir)
 
     def GetImage(self):
         """ Obtener la imagen seleccionada """
@@ -178,15 +119,10 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         document = QJsonDocument(json)
         print(document.toJson())
  
-        # data = QByteArray()
-        # data.append(b'latitud=' + str(self.x) + '&amp;')
-        # data.append(b'longitud=' + str(self.y))
-        # print(data)
 
         req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
         # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/existenRecorridos'))
-        req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader,
-        'application/json')
+        req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, 'application/json')
 
         conf = req.sslConfiguration()
         conf.setPeerVerifyMode(QSslSocket.VerifyNone)
@@ -203,10 +139,9 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         if er == QNetworkReply.NetworkError.NoError:
 
            bytes_string = reply.readAll()
-           print("Error 6: ", bytes_string)
            jsonO = QJsonDocument.fromJson(bytes_string)
            cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
-           print("Error",cantidad_recorrido)
+           print("RECORRIDOS=",cantidad_recorrido)
 
            if cantidad_recorrido > 0:
             self.x = round(self.x, 5)
@@ -229,9 +164,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
             error_message = reply.errorString()
-        #     qgsutils.showUserAndLogMessage(
-        #     u"Error: ", f"Error al acceder a {error_url}, Código: {error_code}, Mensaje: {error_message}"
-        # )
+    
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
@@ -246,31 +179,40 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             puntos = jsonO['puntos'].toArray()
-            punto = puntos[0].toObject()
-            imagenNombre = punto['imagen'].toString()
 
-            if not imagenNombre.endswith('.jpg'):
-                 imagenNombre = imagenNombre + ".jpg"
+            for p in puntos:
+                imageName = p['imagen'].toString()
 
+                if not imageName.endswith('.jpg'):
+                    imageName = imageName + ".jpg"
 
+                imagePath = 'https://10.16.106.74/geo/360/' + p['zona'].toString() + "/" + p['recorrido'].toString() + "/" + imageName,
+                
+                self.imagenesRecorrido.append(imagePath[0])
+                # print(self.imagenesRecorrido)
 
-            self.path = 'https://10.16.106.74/geo/360/' + punto['zona'].toString() + "/" + punto['recorrido'].toString() + "/" + imagenNombre,
-            # self.path = 'https://10.0.1.8/geo/360/' + punto['zona'] + "/" + punto['recorrido'] + "/" + imagenNombre,
-            self.current_image = self.path
+            self.current_image = self.imagenesRecorrido[0]
+            print("Estoy aqui")
+            print(self.current_image)
+            print("imagenesRecorrido", self.imagenesRecorrido)
+            print("CURRENT IMAGE", self.current_image)
+            print("IS NONE", self.current_image is not None)
+            print("ISINSTANCE", isinstance(self.current_image, str))
 
-            print(self.path)
-
-
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", str(self.path), onlyLog=True
-            )
+            if self.current_image is not None:
+                self.ChangeUrlViewer("https://cdn.pannellum.org/2.5/pannellum.htm#panorama=" + self.current_image + "&autoLoad=true")
+            else:
+                qgsutils.showUserAndLogMessage(
+                    u"Infornación: ", u"No existe imagen asociada o la ruta es inavlida"
+                )
+                self.resetQgsRubberBand()
+                self.ChangeUrlViewer(self.DEFAULT_EMPTY)
+            return
         else:
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
             error_message = reply.errorString()
-        #     qgsutils.showUserAndLogMessage(
-        #     u"Error: ", f"Error al acceder a {error_url}, Código: {error_code}, Mensaje: {error_message}"
-        # )
+  
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
@@ -278,105 +220,32 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             print("Error 2: ", error_url)
             print("Error 3: ", error_message)
             print("Error 4: ", er)
-            # qgsutils.showUserAndLogMessage(
-            #     u"Error: ", reply.errorString()
-            # )
-            
-            # print("Error 6: ", punto)
-            # print("Error 7: ", json0)
-            # print("Error 8: ", self.path)
+
 
     def ChangeUrlViewer(self, new_url):
         """Cambiar visor de URL"""
         self.cef_widget.load(QUrl(new_url))
 
-    def ReloadView(self, x, y):
-        """Recargar visor de imágenes"""
-        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-
-        #  Activará la ventana
-        self.activateWindow()
-        self.selected_features = qgsutils.getToFeature(self.layer)
-        self.showFullScreen()
-        self.current_image = self.GetImage()
-
-        # Comprobar si existe la imagen
-        print("Valor de self.current_image: ", self.current_image)
-        if not os.path.exists(self.current_image):
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", u"No existe imagen asociada."
-            )
-            self.ChangeUrlViewer(self.DEFAULT_EMPTY)
-            self.resetQgsRubberBand()
-            return
-
-        # Establecer RubberBand
-        self.resetQgsRubberBand()
-        self.setOrientation(yaw=45)
-        self.setPosition()
-
-        # Copiar arcivo al servidor local
-        self.CopyFile(self.current_image)
-
-        self.ChangeUrlViewer(self.DEFAULT_URL)
 
     def GetBackNextImage(self):
         """ Ir a la imagen de atrás """
         sender = QObject.sender(self)
-        print(sender)
 
-        lys = self.canvas.layers()  # Comprobar si la foto está cargada
-        if not lys:
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", u"Necesita cargar la capa de fotos."
-            )
-            return
+        if sender.objectName() == "btn_back" and self.currentIndex > 0:
+            self.currentIndex -= 1
+        elif self.currentIndex < len(self.imagenesRecorrido) - 1:
+            self.currentIndex += 1
 
-        for layer in lys:
-            if layer.name() == config.layer_name:
-                self.found = True
-                self.iface.setActiveLayer(layer)
+            print(self.currentIndex)
 
-                f = self.selected_features
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        #  Activará la ventana
+        self.activateWindow()
+        self.showFullScreen()
 
-                ac_lordem = f.attribute(config.column_order)
 
-                if sender.objectName() == "btn_back":
-                    new_lordem = int(ac_lordem) - 1
-                else:
-                    new_lordem = int(ac_lordem) + 1
-
-                # Filtar la capa de datos del mapa
-                ids = [
-                    feat.id()
-                    for feat in layer.getFeatures(
-                        QgsFeatureRequest().setFilterExpression(
-                            f"{config.column_order} ='{str(new_lordem)}'"
-                        )
-                    )
-                ]
-
-                if not ids:
-                    qgsutils.showUserAndLogMessage(
-                        u"Información: ", u"Sin imagen."
-                    )
-                    # Filtar la capa de datos del mapa
-                    ids = [
-                        feat.id()
-                        for feat in layer.getFeatures(
-                            QgsFeatureRequest().setFilterExpression(
-                                f"{config.column_order} ='{str(ac_lordem)}'"
-                            )
-                        )
-                    ]
-                #  Actualizar función seleccionada
-                self.ReloadView(ids[0])
-
-        if not self.found:
-            qgsutils.showUserAndLogMessage(
-                u"Información: ", u"Necesita una capa con imágenes y establecer el nombre en el archivo config.py"
-            )
-        return
+        self.current_image = self.imagenesRecorrido[self.currentIndex]
+        self.ChangeUrlViewer("https://cdn.pannellum.org/2.5/pannellum.htm#panorama=" + self.current_image + "&autoLoad=true")
 
     def FullScreen(self, value):
         """ Botón de acción de pantalla completa """
@@ -387,127 +256,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.showFullScreen()
         else:
             self.showNormal()
-
-    def UpdateOrientation(self, yaw=None):
-        """ Actualizar orientación """
-        self.bearing = self.selected_features.attribute(config.column_yaw)
-        try:
-            self.actualPointOrientation.reset()
-        except Exception:
-            pass
-
-        self.actualPointOrientation = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-        )
-        # Indicador azul de posicionamiento en el mapa.
-        self.actualPointOrientation.setColor(Qt.blue)
-        self.actualPointOrientation.setWidth(2)
-        self.actualPointOrientation.addPoint(self.actualPointDx)
-
-        # End Point
-        CS = self.canvas.mapUnitsPerPixel() * 15  # Determina el tamaño del puntero
-        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
-
-        self.actualPointOrientation.addPoint(
-            QgsPointXY(float(A1x), float(A1y)))
-
-        # Ángulo de visión
-        if yaw is not None:
-            angle = float(self.bearing + yaw) * math.pi / -180  # Velocidad de giro (línea azul)
-        else:
-            angle = float(self.bearing) * math.pi / -180  
-
-        tmpGeom = self.actualPointOrientation.asGeometry()
-
-        self.actualPointOrientation.setToGeometry(
-            self.rotateTool.rotate(
-                tmpGeom, self.actualPointDx, angle),
-            self.dumLayer
-        )
-
-    def setOrientation(self, yaw=None):
-        """ Establecer la orientación en la primera vez """
-        self.bearing = self.selected_features.attribute(config.column_yaw)
-
-        originalPoint = self.selected_features.geometry().asPoint()
-        self.actualPointDx = qgsutils.convertProjection(
-            self.x,
-            self.y,
-            self.layer.crs().authid(),
-            self.canvas.mapSettings().destinationCrs().authid(),
-        )
-
-        self.actualPointOrientation = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.LineGeometry
-        )
-        self.actualPointOrientation.setColor(Qt.blue)
-        self.actualPointOrientation.setWidth(3)
-
-        self.actualPointOrientation.addPoint(self.actualPointDx)
-
-        # End Point
-        CS = self.canvas.mapUnitsPerPixel() * 15
-        A1x = self.actualPointDx.x() - CS * math.cos(math.pi / 2)
-        A1y = self.actualPointDx.y() + CS * math.sin(math.pi / 2)
-
-        self.actualPointOrientation.addPoint(
-            QgsPointXY(float(A1x), float(A1y)))
-
-        # Ángulo de visión
-        if yaw is not None:
-            angle = float(self.bearing + yaw) * math.pi / -180
-        else:
-            angle = float(self.bearing) * math.pi / -180
-
-        tmpGeom = self.actualPointOrientation.asGeometry()
-
-        self.rotateTool = transformGeometry()
-        epsg = self.canvas.mapSettings().destinationCrs().authid()
-        self.dumLayer = QgsVectorLayer(
-            f"Point?crs={epsg}", "temporary_points", "memory"
-        )
-        self.actualPointOrientation.setToGeometry(
-            self.rotateTool.rotate(
-                tmpGeom, self.actualPointDx, angle), self.dumLayer
-        )
-
-    def setPosition(self):
-        """ Establecer la posición RubberBand """
-
-        # Punto de transformación
-        originalPoint = self.selected_features.geometry().asPoint()
-        self.actualPointDx = qgsutils.convertProjection(
-            originalPoint.x(),
-            originalPoint.y(),
-            "EPSG:3857",
-            self.canvas.mapSettings().destinationCrs().authid(),
-        )
-
-        self.positionDx = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry)
-        self.positionDx.setWidth(3)
-        self.positionDx.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionDx.setIconSize(3)
-        self.positionDx.setColor(Qt.blue)
-        self.positionSx = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        )
-        self.positionSx.setWidth(3)
-        self.positionSx.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionSx.setIconSize(3)
-        self.positionSx.setColor(Qt.blue)
-        self.positionInt = QgsRubberBand(
-            self.iface.mapCanvas(), QgsWkbTypes.PointGeometry
-        )
-        self.positionInt.setWidth(6)
-        self.positionInt.setIcon(QgsRubberBand.ICON_BOX)
-        self.positionInt.setIconSize(3)
-        self.positionInt.setColor(Qt.blue)
-
-        self.positionDx.addPoint(self.actualPointDx)
-        self.positionSx.addPoint(self.actualPointDx)
-        self.positionInt.addPoint(self.actualPointDx)
 
     def closeEvent(self, _):
         """ Cerrar cuadro de diálogo """
