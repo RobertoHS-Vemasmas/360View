@@ -12,7 +12,7 @@ var geometry = new Marzipano.EquirectGeometry([{ width: 8192 }]);
 
 // Crear vista.
 var limiter = Marzipano.RectilinearView.limit.traditional(8192, 100*Math.PI/180);
-var view = new Marzipano.RectilinearView({ yaw:Math.PI/180 },limiter);
+var view = new Marzipano.RectilinearView({ yaw:180*Math.PI/180},limiter);
 
 // Create scene.
 var scene = viewer.createScene({

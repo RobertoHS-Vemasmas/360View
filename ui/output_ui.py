@@ -34,14 +34,10 @@ class Ui_orbitalDialog(object):
         self.horizontalLayout.addItem(spacerItem)
         self.btn_next = QtWidgets.QPushButton(self.dockWidgetContents)
         self.btn_next.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("images/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_next.setIcon(icon)
         self.btn_next.setObjectName("btn_next")
         self.horizontalLayout.addWidget(self.btn_next)
         self.btn_back = QtWidgets.QPushButton(self.dockWidgetContents)
         self.btn_back.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.btn_back.setIcon(icon)
         self.btn_back.setObjectName("btn_back")
         self.horizontalLayout.addWidget(self.btn_back)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -50,10 +46,12 @@ class Ui_orbitalDialog(object):
         orbitalDialog.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(orbitalDialog)
-        self.btn_back.clicked.connect(orbitalDialog.GetBackNextImage) # type: ignore
         self.btn_next.clicked.connect(orbitalDialog.GetBackNextImage) # type: ignore
+        self.btn_back.clicked.connect(orbitalDialog.GetBackNextImage) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(orbitalDialog)
 
     def retranslateUi(self, orbitalDialog):
         _translate = QtCore.QCoreApplication.translate
-        orbitalDialog.setWindowTitle(_translate("orbitalDialog", "Visor de imágenes 360°"))
+        orbitalDialog.setWindowTitle(_translate("orbitalDialog", "Visor 360°"))
+        self.btn_next.setText(_translate("orbitalDialog", "<"))
+        self.btn_back.setText(_translate("orbitalDialog", ">"))

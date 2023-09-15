@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Visor de imágenes 360°</string>
+   <string>Visor 360°</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -47,9 +47,8 @@
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
+        <property name="text">
+         <string>&lt;</string>
         </property>
        </widget>
       </item>
@@ -58,9 +57,8 @@
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
+        <property name="text">
+         <string>&gt;</string>
         </property>
        </widget>
       </item>
@@ -82,26 +80,8 @@
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="icons.qrc"/>
- </resources>
+ <resources/>
  <connections>
-  <connection>
-   <sender>btn_back</sender>
-   <signal>clicked()</signal>
-   <receiver>orbitalDialog</receiver>
-   <slot>GetBackNextImage()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>279</x>
-     <y>294</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>173</x>
-     <y>311</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>btn_next</sender>
    <signal>clicked()</signal>
@@ -115,6 +95,22 @@
     <hint type="destinationlabel">
      <x>332</x>
      <y>303</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_back</sender>
+   <signal>clicked()</signal>
+   <receiver>orbitalDialog</receiver>
+   <slot>GetBackNextImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>294</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>173</x>
+     <y>311</y>
     </hint>
    </hints>
   </connection>
