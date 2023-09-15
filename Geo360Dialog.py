@@ -182,7 +182,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
             pathInicial = 'https://10.16.106.74/geo/360/' + punto_inicial['zona'].toString() + "/" + punto_inicial['recorrido'].toString() + "/" + nombreInicial
 
-            indiceInicial = 0
             i = 0
             for p in puntos:
                 imageName = p['imagen'].toString()
@@ -192,13 +191,13 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
                 imagePath = 'https://10.16.106.74/geo/360/' + p['zona'].toString() + "/" + p['recorrido'].toString() + "/" + imageName
                 if imagePath == pathInicial:
-                    indiceInicial = i
+                    self.currentIndex = i
                 else:
                     i += 1
                     
                 self.imagenesRecorrido.append(imagePath)
 
-            self.current_image = self.imagenesRecorrido[indiceInicial]
+            self.current_image = self.imagenesRecorrido[self.currentIndex]
 
             if self.current_image is not None and isinstance(self.current_image, str):                
                 self.DownloadFile(self.current_image)
@@ -276,7 +275,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         """ Ir a la imagen de atrás """
         sender = QObject.sender(self)
 
-        if sender.objectName() == "btn_next" and self.currentIndex > indiceInicial:
+        if sender.objectName() == "btn_next" and self.currentIndex > 0:
             self.currentIndex -= 1
             self.ReloadView()
         elif self.currentIndex < len(self.imagenesRecorrido) - 1:
