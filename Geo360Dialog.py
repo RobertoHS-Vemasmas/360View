@@ -34,14 +34,10 @@ from qgis.PyQt.QtNetwork import(
     QNetworkReply,
     QSslSocket)
 
-try:
-    from PIL import Image
-except ImportError:
-    None
 
 class _ViewerPage(QWebPage):
     obj = []  # Sincrónico
-    newData = pyqtSignal(list)  # Asincrónico
+    newData = pyqtSignal(list) # Asincrónico
 
     def javaScriptConsoleMessage(self, msg, line, source):
         l = msg.split(",")
@@ -62,8 +58,9 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.DEFAULT_EMPTY = (f"http://{config.IP}:{str(config.PORT)}/none.html")
         self.DEFAULT_BLANK = (f"http://{config.IP}:{str(config.PORT)}/blank.html")
 
+
         # Crear vista
-        self.CreateViewer()
+        
 
         self.plugin_path = os.path.dirname(os.path.realpath(__file__))
         self.iface = iface
@@ -75,6 +72,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.y = y
         self.found = False
         self.actualPointOrientation = None
+        self.RemoveImage()
+
         
         # Obtener la ruta de la imagen.
         self.current_image = None
@@ -82,12 +81,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.currentIndex = 0
         self.GetImage()
 
-        # Comprobar si existe la imagen
-        # print(self.current_image)
-        # print("imagenesRecorrido", self.imagenesRecorrido)
-        # print("CURRENT IMAGE", self.current_image)
-        # print("IS NONE", self.current_image is not None)
-        # print("ISINSTANCE", isinstance(self.current_image, str))
       
 
     def CreateViewer(self):
@@ -95,6 +88,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         qgsutils.showUserAndLogMessage(
             u"Información: ", u"Crear visor", onlyLog=True
         )
+
 
         self.cef_widget = QWebView()
         self.cef_widget.setContextMenuPolicy(Qt.NoContextMenu)
@@ -111,14 +105,13 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.cef_widget.load(QUrl(self.DEFAULT_URL))
         self.ViewerLayout.addWidget(self.cef_widget, 1, 0)
 
+
     def GetImage(self):
         """ Obtener la imagen seleccionada """
         self.x = round(self.x, 5)
         self.y = round(self.y, 5)
-        json = {'latitud' : self.y, 'longitud' : self.x} #Se invierten las coordenadas
-        document = QJsonDocument(json)
-        print(document.toJson())
- 
+        json = {'latitud' : self.y, 'longitud' : self.x} # Se invierten las coordenadas
+        document = QJsonDocument(json) 
 
         req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
         # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/existenRecorridos'))
@@ -130,36 +123,51 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         self.nam = QNetworkAccessManager()
         self.nam.finished.connect(self.handleResponse)
+        print("Sending request to:", req.url().toString())
         self.nam.post(req, document.toJson())
+        print("Request sent")
 
-        print(req)
 
     def handleResponse(self, reply):
         er = reply.error()
         if er == QNetworkReply.NetworkError.NoError:
 
-           bytes_string = reply.readAll()
-           jsonO = QJsonDocument.fromJson(bytes_string)
-           cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
-           print("RECORRIDOS=",cantidad_recorrido)
+            bytes_string = reply.readAll()
+            jsonO = QJsonDocument.fromJson(bytes_string)
+            cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
 
-           if cantidad_recorrido > 0:
-            self.x = round(self.x, 5)
-            self.y = round(self.y, 5)
-            json = {'latitud' : self.y, 'longitud' : self.x} #Se invierten las coordenadas
-            document = QJsonDocument(json)
+            print("Received response with cantidad_recorrido:", cantidad_recorrido)
 
-            req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
-            # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/obtenerRecorridos'))
-            req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, 'application/json')
+            if cantidad_recorrido > 0:
+                self.iface.addDockWidget(Qt.RightDockWidgetArea, self)
+                self.show()
+                self.CreateViewer()
+                self.x = round(self.x, 5)
+                self.y = round(self.y, 5)
+                json = {'latitud' : self.y, 'longitud' : self.x} # Se invierten las coordenadas
+                document = QJsonDocument(json)
 
-            conf = req.sslConfiguration()
-            conf.setPeerVerifyMode(QSslSocket.VerifyNone)
-            req.setSslConfiguration(conf)
+                req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
+                # req = QNetworkRequest(QUrl('http://localhost:8000/recorridos360/obtenerRecorridos'))
+                req.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, 'application/json')
 
-            self.nam2 = QNetworkAccessManager()
-            self.nam2.finished.connect(self.handleRecorrido)
-            self.nam2.post(req, document.toJson())
+                conf = req.sslConfiguration()
+                conf.setPeerVerifyMode(QSslSocket.VerifyNone)
+                req.setSslConfiguration(conf)
+
+                self.nam2 = QNetworkAccessManager()
+                self.nam2.finished.connect(self.handleRecorrido)
+                self.nam2.post(req, document.toJson())
+
+                if cantidad_recorrido == cantidad_recorrido:
+                    # Mostrar un mensaje cuando la cantidad de recorridos llega al total
+                    qgsutils.showUserAndLogMessage(
+                        u"Información:", f"Se han encontrado {cantidad_recorrido} recorridos en total."
+                    )
+            else:
+                qgsutils.showUserAndLogMessage(
+                    u"Información:", f"No existen recorridos asociados."
+                )
         else:
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
@@ -168,10 +176,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
-            print("Error 1: ", error_code)
-            print("Error 2: ", error_url)
-            print("Error 3: ", error_message)
-            print("Error 4: ", er)
 
     def handleRecorrido(self, reply):
         er = reply.error()
@@ -189,18 +193,13 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
                 imagePath = 'https://10.16.106.74/geo/360/' + p['zona'].toString() + "/" + p['recorrido'].toString() + "/" + imageName,
                 
                 self.imagenesRecorrido.append(imagePath[0])
-                # print(self.imagenesRecorrido)
 
             self.current_image = self.imagenesRecorrido[0]
-            print("Estoy aqui")
-            print(self.current_image)
-            print("imagenesRecorrido", self.imagenesRecorrido)
-            print("CURRENT IMAGE", self.current_image)
-            print("IS NONE", self.current_image is not None)
-            print("ISINSTANCE", isinstance(self.current_image, str))
 
-            if self.current_image is not None:
-                self.ChangeUrlViewer("https://cdn.pannellum.org/2.5/pannellum.htm#panorama=" + self.current_image + "&autoLoad=true")
+            if self.current_image is not None and isinstance(self.current_image, str):                
+                self.DownloadFile(self.current_image)
+                self.ChangeUrlViewer(self.DEFAULT_URL)
+                
             else:
                 qgsutils.showUserAndLogMessage(
                     u"Infornación: ", u"No existe imagen asociada o la ruta es inavlida"
@@ -216,10 +215,52 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
-            print("Error 1: ", error_code)
-            print("Error 2: ", error_url)
-            print("Error 3: ", error_message)
-            print("Error 4: ", er)
+
+    def DownloadFile(self, src):
+        """ Copiar archivo de imagen en servidor local """
+        qgsutils.showUserAndLogMessage(
+            u"Información: ", u"Copiando imagen", onlyLog=True
+        )
+        
+        req = QNetworkRequest(QUrl(src))
+
+        conf = req.sslConfiguration()
+        conf.setPeerVerifyMode(QSslSocket.VerifyNone)
+        req.setSslConfiguration(conf)
+
+        self.nam3 = QNetworkAccessManager()
+        self.nam3.finished.connect(self.handleDownload)
+        self.nam3.get(req)
+
+
+    def handleDownload(self, reply):
+        er = reply.error()
+
+        if er == QNetworkReply.NetworkError.NoError:
+            data = reply.readAll()
+            self.saveFile(data)
+
+        else:
+            error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+            error_url = reply.url().toString()
+            error_message = reply.errorString()
+  
+            qgsutils.showUserAndLogMessage(
+                u"Error: ", reply.errorString()
+            )
+
+    def saveFile(self, data):
+        dst_dir = self.plugin_path + "/viewer"
+        dst_dir = dst_dir + "/image.jpg"
+
+        try:
+            os.remove(dst_dir)
+        except OSError:
+            pass
+
+        f = open(dst_dir, 'wb')
+        with f:
+            f.write(data)
 
 
     def ChangeUrlViewer(self, new_url):
@@ -231,31 +272,62 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         """ Ir a la imagen de atrás """
         sender = QObject.sender(self)
 
-        if sender.objectName() == "btn_back" and self.currentIndex > 0:
+        if sender.objectName() == "btn_next" and self.currentIndex > 0:
             self.currentIndex -= 1
+            self.ReloadView()
         elif self.currentIndex < len(self.imagenesRecorrido) - 1:
             self.currentIndex += 1
+            self.ReloadView()
+        print("URL de la imagen actual:", self.current_image)
+        
+        #  Actualizar función seleccionada
+        # self.ReloadView()
 
-            print(self.currentIndex)
 
+    def ReloadView(self):
+        """Recargar visor de imágenes"""
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.RemoveImage()
+
+
         #  Activará la ventana
         self.activateWindow()
-        self.showFullScreen()
-
-
+        # self.showFullScreen()
         self.current_image = self.imagenesRecorrido[self.currentIndex]
-        self.ChangeUrlViewer("https://cdn.pannellum.org/2.5/pannellum.htm#panorama=" + self.current_image + "&autoLoad=true")
 
-    def FullScreen(self, value):
-        """ Botón de acción de pantalla completa """
-        qgsutils.showUserAndLogMessage(
-            u"Información: ", u"Pantalla completa.", onlyLog=True
-        )
-        if value:
-            self.showFullScreen()
+        # Comprobar si existe la imagen
+        if self.current_image is not None and isinstance(self.current_image, str):
+            # Copiar arcivo al servidor local
+            self.DownloadFile(self.current_image)
+            self.ChangeUrlViewer(self.DEFAULT_URL)
+
         else:
-            self.showNormal()
+            qgsutils.showUserAndLogMessage(
+                u"Información: ", u"No existe imagen asociada."
+            )
+            self.ChangeUrlViewer(self.DEFAULT_EMPTY)
+            self.resetQgsRubberBand()
+            return
+
+
+    # def FullScreen(self, value):
+    #     """ Botón de acción de pantalla completa """
+    #     qgsutils.showUserAndLogMessage(
+    #         u"Información: ", u"Pantalla completa.", onlyLog=True
+    #     )
+    #     if value:
+    #         self.showFullScreen()
+    #     else:
+    #         self.showNormal()
+
+
+    def RemoveImage(self):
+        """ Quitar imagen """
+        try:
+            os.remove(self.plugin_path + "/viewer/image.jpg")
+        except OSError:
+            pass
+
 
     def closeEvent(self, _):
         """ Cerrar cuadro de diálogo """
@@ -264,6 +336,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.iface.actionPan().trigger()
         self.parent.orbitalViewer = None
         self.RemoveImage()
+
 
     def resetQgsRubberBand(self):
         """ Retire RubberBand """
@@ -274,6 +347,3 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.actualPointOrientation.reset()
         except Exception:
             None
-
-
-            
