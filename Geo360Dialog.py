@@ -350,3 +350,4 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.actualPointOrientation.reset()
         except Exception:
             None
+            
