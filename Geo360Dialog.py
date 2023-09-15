@@ -103,7 +103,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         """ Obtener la imagen seleccionada """
         self.x = round(self.x, 5)
         self.y = round(self.y, 5)
-        json = {'latitud' : self.y, 'longitud' : self.x} # Se invierten las coordenadas
+        json = {'latitud' : self.y, 'longitud' : self.x}
         document = QJsonDocument(json) 
 
         req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/existenRecorridos'))
@@ -126,7 +126,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
-
             print("Cantidad_recorrido: ", cantidad_recorrido)
 
             if cantidad_recorrido > 0:
@@ -135,7 +134,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
                 self.CreateViewer()
                 self.x = round(self.x, 5)
                 self.y = round(self.y, 5)
-                json = {'latitud' : self.y, 'longitud' : self.x} # Se invierten las coordenadas
+                json = {'latitud' : self.y, 'longitud' : self.x}
                 document = QJsonDocument(json)
 
                 req = QNetworkRequest(QUrl('https://10.16.106.74/ideeqro_api/recorridos360/obtenerRecorridos'))
@@ -167,6 +166,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             qgsutils.showUserAndLogMessage(
                 u"Error: ", reply.errorString()
             )
+
 
     def handleRecorrido(self, reply):
         er = reply.error()
@@ -219,6 +219,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
                 u"Error: ", reply.errorString()
             )
 
+
     def DownloadFile(self, src):
         """ Copiar archivo de imagen en servidor local """
         qgsutils.showUserAndLogMessage(
@@ -226,7 +227,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         )
         
         req = QNetworkRequest(QUrl(src))
-
         conf = req.sslConfiguration()
         conf.setPeerVerifyMode(QSslSocket.VerifyNone)
         req.setSslConfiguration(conf)
@@ -242,7 +242,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         if er == QNetworkReply.NetworkError.NoError:
             data = reply.readAll()
             self.saveFile(data)
-
         else:
             error_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
             error_url = reply.url().toString()
@@ -281,6 +280,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         elif self.currentIndex < len(self.imagenesRecorrido) - 1:
             self.currentIndex += 1
             self.ReloadView()
+
             print("URL de la imagen actual: ", self.current_image)
         
         #  Actualizar función seleccionada
@@ -350,4 +350,3 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             self.actualPointOrientation.reset()
         except Exception:
             None
-            

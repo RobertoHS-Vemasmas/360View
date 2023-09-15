@@ -35,6 +35,7 @@ class Geo360:
         self.server = None
         self.make_server()
 
+
     def initGui(self):
         log.initLogging()
         self.action = QAction(
@@ -46,10 +47,12 @@ class Geo360:
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu(u"&Visor 360°", self.action)
 
+
     def unload(self):
         self.iface.removePluginMenu(u"&Visor 360°", self.action)
         self.iface.removeToolBarIcon(self.action)
         self.close_server()
+
 
     def close_server(self):
         if self.server is not None:
@@ -59,6 +62,7 @@ class Geo360:
             while self.server_thread.is_alive():
                 self.server_thread.join()
             self.server = None
+
 
     def make_server(self):
         self.close_server()
@@ -81,6 +85,7 @@ class Geo360:
         except Exception:
             print("Server Error")
 
+
     def run(self):
         self.found = False
         lys = self.canvas.layers()
@@ -95,6 +100,7 @@ class Geo360:
         #         u"Información: ", u"Necesitas subir recorrido."
         #     )
             # return
+
 
     def ShowViewer(self, x, y):
         """ Mostrar el visor 360° """
@@ -129,8 +135,10 @@ class SelectTool(QgsMapToolIdentify):
         cursor_image = QPixmap(image_path)
         self.custom_cursor = QCursor(cursor_image)
 
+
     def activate(self):
         self.canvas.setCursor(self.custom_cursor)
+
 
     def canvasReleaseEvent(self, event):
         x = event.pos().x()
