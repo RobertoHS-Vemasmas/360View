@@ -58,10 +58,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.DEFAULT_EMPTY = (f"http://{config.IP}:{str(config.PORT)}/none.html")
         self.DEFAULT_BLANK = (f"http://{config.IP}:{str(config.PORT)}/blank.html")
 
-
-        # Crear vista
-        
-
         self.plugin_path = os.path.dirname(os.path.realpath(__file__))
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
@@ -74,7 +70,6 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.actualPointOrientation = None
         self.RemoveImage()
 
-        
         # Obtener la ruta de la imagen.
         self.current_image = None
         self.imagenesRecorrido = []
@@ -82,13 +77,11 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         self.GetImage()
 
       
-
     def CreateViewer(self):
         """ Crear visor """
         qgsutils.showUserAndLogMessage(
             u"Información: ", u"Crear visor", onlyLog=True
         )
-
 
         self.cef_widget = QWebView()
         self.cef_widget.setContextMenuPolicy(Qt.NoContextMenu)
@@ -123,10 +116,8 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
 
         self.nam = QNetworkAccessManager()
         self.nam.finished.connect(self.handleResponse)
-        print("Sending request to:", req.url().toString())
+        print("Enviando solicitud a: ", req.url().toString())
         self.nam.post(req, document.toJson())
-        print("Request sent")
-
 
     def handleResponse(self, reply):
         er = reply.error()
@@ -136,7 +127,7 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             jsonO = QJsonDocument.fromJson(bytes_string)
             cantidad_recorrido = jsonO['cantidadRecorridos'].toInt()
 
-            print("Received response with cantidad_recorrido:", cantidad_recorrido)
+            print("Cantidad_recorrido: ", cantidad_recorrido)
 
             if cantidad_recorrido > 0:
                 self.iface.addDockWidget(Qt.RightDockWidgetArea, self)
@@ -183,18 +174,31 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
             bytes_string = reply.readAll()
             jsonO = QJsonDocument.fromJson(bytes_string)
             puntos = jsonO['puntos'].toArray()
+            punto_inicial = jsonO['puntoInicial'].toObject()
 
+            nombreInicial = punto_inicial['imagen'].toString()
+            if not nombreInicial.endswith('.jpg'):
+                nombreInicial = nombreInicial + ".jpg"
+
+            pathInicial = 'https://10.16.106.74/geo/360/' + punto_inicial['zona'].toString() + "/" + punto_inicial['recorrido'].toString() + "/" + nombreInicial
+
+            indiceInicial = 0
+            i = 0
             for p in puntos:
                 imageName = p['imagen'].toString()
 
                 if not imageName.endswith('.jpg'):
                     imageName = imageName + ".jpg"
 
-                imagePath = 'https://10.16.106.74/geo/360/' + p['zona'].toString() + "/" + p['recorrido'].toString() + "/" + imageName,
-                
-                self.imagenesRecorrido.append(imagePath[0])
+                imagePath = 'https://10.16.106.74/geo/360/' + p['zona'].toString() + "/" + p['recorrido'].toString() + "/" + imageName
+                if imagePath == pathInicial:
+                    indiceInicial = i
+                else:
+                    i += 1
+                    
+                self.imagenesRecorrido.append(imagePath)
 
-            self.current_image = self.imagenesRecorrido[0]
+            self.current_image = self.imagenesRecorrido[indiceInicial]
 
             if self.current_image is not None and isinstance(self.current_image, str):                
                 self.DownloadFile(self.current_image)
@@ -272,13 +276,13 @@ class Geo360Dialog(QDockWidget, Ui_orbitalDialog):
         """ Ir a la imagen de atrás """
         sender = QObject.sender(self)
 
-        if sender.objectName() == "btn_next" and self.currentIndex > 0:
+        if sender.objectName() == "btn_next" and self.currentIndex > indiceInicial:
             self.currentIndex -= 1
             self.ReloadView()
         elif self.currentIndex < len(self.imagenesRecorrido) - 1:
             self.currentIndex += 1
             self.ReloadView()
-        print("URL de la imagen actual:", self.current_image)
+            print("URL de la imagen actual: ", self.current_image)
         
         #  Actualizar función seleccionada
         # self.ReloadView()
